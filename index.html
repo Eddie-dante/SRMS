@@ -1,1 +1,1853 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>SRMS - School Resource Management System by WeGEM</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://cdn.jsdelivr.net/npm/emailjs-com@3/dist/email.min.js"></script>
+    <script src="https://unpkg.com/html5-qrcode@2.3.8/dist/html5-qrcode.min.js"></script>
+    <script src="https://cdn.rawgit.com/davidshimjs/qrcodejs/gh-pages/qrcode.min.js"></script>
+    <style>
+        :root {
+            --primary: #0a0e27;
+            --accent: #e94560;
+            --accent-hover: #c62a47;
+            --gold: #d4af37;
+            --gold-light: #f0d060;
+            --success: #28a745;
+            --warning: #ffc107;
+            --danger: #dc3545;
+            --info: #0f3460;
+            --chat-primary: #1a1f4e;
+            --chat-secondary: #0f3460;
+            --border-radius: 12px;
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            --glass-bg: rgba(255, 255, 255, 0.12);
+            --glass-bg-card: rgba(255, 255, 255, 0.1);
+            --glass-bg-input: rgba(255, 255, 255, 0.08);
+            --glass-bg-nav: rgba(255, 255, 255, 0.06);
+            --text-color: rgba(255, 255, 255, 0.95);
+            --text-secondary: rgba(255, 255, 255, 0.75);
+            --text-muted: rgba(255, 255, 255, 0.55);
+            --border-color: rgba(255, 255, 255, 0.15);
+        }
 
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            background: var(--primary);
+            min-height: 100vh;
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+            background-repeat: no-repeat;
+            transition: background-image 0.8s ease;
+            color: var(--text-color);
+        }
+
+        body::before {
+            display: none;
+        }
+
+        .overlay {
+            position: relative;
+            z-index: 1;
+            min-height: 100vh;
+            background: rgba(0, 0, 0, 0.15);
+            backdrop-filter: blur(2px);
+            -webkit-backdrop-filter: blur(2px);
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .startup-page {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, #0a0e27, #1a1f4e, #0f3460);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .startup-particles {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+        }
+
+        .startup-particle {
+            position: absolute;
+            background: rgba(212, 175, 55, 0.15);
+            border-radius: 50%;
+            animation: floatUp 15s infinite linear;
+        }
+
+        @keyframes floatUp {
+            0% {
+                transform: translateY(100vh) scale(0);
+                opacity: 0;
+            }
+            10% {
+                opacity: 1;
+            }
+            90% {
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(-10vh) scale(1.5);
+                opacity: 0;
+            }
+        }
+
+        .startup-logo-container {
+            text-align: center;
+            position: relative;
+            z-index: 10;
+            animation: logoEntrance 1.2s ease-out;
+        }
+
+        @keyframes logoEntrance {
+            0% {
+                transform: scale(0.3) rotate(-10deg);
+                opacity: 0;
+            }
+            60% {
+                transform: scale(1.05) rotate(2deg);
+            }
+            100% {
+                transform: scale(1) rotate(0deg);
+                opacity: 1;
+            }
+        }
+
+        .logo-wrapper {
+            position: relative;
+            display: inline-block;
+            margin-bottom: 20px;
+        }
+
+        .logo-main {
+            width: 160px;
+            height: 160px;
+            background: linear-gradient(135deg, #d4af37, #f0d060, #d4af37);
+            border-radius: 35px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 55px;
+            font-weight: 900;
+            color: #0a0e27;
+            box-shadow: 0 20px 60px rgba(212, 175, 55, 0.4), 0 0 100px rgba(212, 175, 55, 0.2);
+            animation: logoGlow 3s ease-in-out infinite;
+            letter-spacing: 2px;
+        }
+
+        @keyframes logoGlow {
+            0%,
+            100% {
+                box-shadow: 0 20px 60px rgba(212, 175, 55, 0.4), 0 0 100px rgba(212, 175, 55, 0.2);
+            }
+            50% {
+                box-shadow: 0 20px 80px rgba(212, 175, 55, 0.7), 0 0 150px rgba(212, 175, 55, 0.4);
+            }
+        }
+
+        .logo-ring {
+            position: absolute;
+            inset: -15px;
+            border: 3px solid rgba(212, 175, 55, 0.3);
+            border-radius: 45px;
+            animation: ringPulse 3s ease-in-out infinite;
+        }
+
+        .logo-ring:nth-child(2) {
+            inset: -30px;
+            animation-delay: 0.5s;
+            border-color: rgba(212, 175, 55, 0.15);
+        }
+
+        @keyframes ringPulse {
+            0%,
+            100% {
+                transform: scale(1);
+                opacity: 0.3;
+            }
+            50% {
+                transform: scale(1.08);
+                opacity: 0.8;
+            }
+        }
+
+        .system-name {
+            font-size: 3.5em;
+            font-weight: 900;
+            background: linear-gradient(180deg, #f0d060, #d4af37, #b8941f);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            letter-spacing: 8px;
+            margin-bottom: 5px;
+        }
+
+        .system-subtitle {
+            font-size: 1.4em;
+            color: rgba(255, 255, 255, 0.8);
+            margin-bottom: 20px;
+            font-weight: 300;
+            letter-spacing: 2px;
+        }
+
+        .credits {
+            font-size: 1.1em;
+            color: rgba(212, 175, 55, 0.9);
+            margin-bottom: 40px;
+            font-weight: 500;
+            letter-spacing: 1px;
+            animation: fadeInUp 1s ease 0.5s both;
+        }
+
+        .credits span {
+            color: #f0d060;
+            font-weight: 700;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .startup-buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            width: 100%;
+            max-width: 400px;
+            animation: fadeInUp 1s ease 0.7s both;
+        }
+
+        .startup-btn {
+            padding: 18px 30px;
+            border: 2px solid transparent;
+            border-radius: 50px;
+            font-size: 1.1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+            letter-spacing: 1px;
+            text-transform: uppercase;
+        }
+
+        .startup-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 24px 64px rgba(0, 0, 0, 0.3);
+        }
+
+        .startup-btn-login {
+            background: rgba(255, 255, 255, 0.1);
+            border-color: rgba(255, 255, 255, 0.3);
+            color: white;
+        }
+
+        .startup-btn-signup {
+            background: rgba(40, 167, 69, 0.8);
+            border-color: #28a745;
+            color: white;
+        }
+
+        .startup-btn-create {
+            background: linear-gradient(135deg, #d4af37, #b8941f);
+            border-color: #d4af37;
+            color: #0a0e27;
+        }
+
+        .main-container {
+            background: var(--glass-bg);
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            border-radius: 16px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            padding: 25px;
+            border: 1px solid var(--border-color);
+        }
+
+        h1,
+        h2,
+        h3 {
+            color: var(--text-color);
+            margin-bottom: 15px;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+        }
+
+        h2 {
+            border-left: 4px solid var(--accent);
+            padding-left: 15px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 15px 0;
+            font-size: 13px;
+            background: rgba(255, 255, 255, 0.08);
+            color: var(--text-color);
+        }
+
+        th,
+        td {
+            border: 1px solid var(--border-color);
+            padding: 10px;
+            text-align: left;
+        }
+
+        th {
+            background: rgba(10, 14, 39, 0.6);
+            color: white;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+
+        th:hover {
+            background: rgba(233, 69, 96, 0.5);
+        }
+
+        button {
+            margin: 5px;
+            padding: 10px 18px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 500;
+            transition: var(--transition);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            color: white;
+        }
+
+        button:active {
+            transform: scale(0.95);
+        }
+
+        .btn-primary {
+            background: rgba(233, 69, 96, 0.7);
+        }
+        .btn-secondary {
+            background: rgba(15, 52, 96, 0.6);
+        }
+        .btn-danger {
+            background: rgba(220, 53, 69, 0.7);
+        }
+        .btn-success {
+            background: rgba(40, 167, 69, 0.7);
+        }
+        .btn-export {
+            background: rgba(108, 117, 125, 0.6);
+        }
+        .btn-gold {
+            background: linear-gradient(135deg, rgba(212, 175, 55, 0.8), rgba(184, 148, 31, 0.8));
+            color: #0a0e27;
+            font-weight: 700;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+        .center {
+            text-align: center;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 600;
+            color: var(--text-color);
+            font-size: 0.9em;
+            text-shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            font-size: 14px;
+            transition: var(--transition);
+            background: var(--glass-bg-input);
+            color: white;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus {
+            border-color: var(--accent);
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(233, 69, 96, 0.2);
+        }
+
+        select {
+            color: white;
+            background: rgba(15, 52, 96, 0.5);
+        }
+
+        select option {
+            background: #1a1f4e;
+            color: white;
+        }
+
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 15px 24px;
+            border-radius: 8px;
+            color: white;
+            font-weight: 600;
+            z-index: 10000;
+            animation: slideIn 0.4s ease;
+            box-shadow: 0 16px 48px rgba(0, 0, 0, 0.2);
+            max-width: 400px;
+            backdrop-filter: blur(15px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .notification.success {
+            background: rgba(40, 167, 69, 0.7);
+        }
+        .notification.error {
+            background: rgba(220, 53, 69, 0.7);
+        }
+        .notification.info {
+            background: rgba(23, 162, 184, 0.7);
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateX(120%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        .settings-group {
+            border: 1px solid var(--border-color);
+            border-radius: var(--border-radius);
+            padding: 25px;
+            margin-bottom: 25px;
+            background: rgba(255, 255, 255, 0.08);
+            backdrop-filter: blur(10px);
+        }
+
+        .scrollable-table {
+            max-height: 500px;
+            overflow: auto;
+            border: 1px solid var(--border-color);
+            border-radius: var(--border-radius);
+        }
+
+        .role-badge {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+
+        .role-admin {
+            background: rgba(233, 69, 96, 0.7);
+            color: white;
+        }
+        .role-teacher {
+            background: rgba(15, 52, 96, 0.6);
+            color: white;
+        }
+        .role-librarian {
+            background: rgba(40, 167, 69, 0.7);
+            color: white;
+        }
+
+        .nav-buttons {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-bottom: 20px;
+            padding: 15px;
+            border-bottom: 1px solid var(--border-color);
+            background: var(--glass-bg-nav);
+            backdrop-filter: blur(10px);
+            border-radius: var(--border-radius);
+        }
+
+        .nav-buttons button {
+            background: rgba(255, 255, 255, 0.06);
+            color: var(--text-color);
+            border: 1px solid var(--border-color);
+        }
+
+        .nav-buttons button:hover,
+        .nav-buttons button.active-tab {
+            background: rgba(233, 69, 96, 0.6);
+            color: white;
+            border-color: rgba(233, 69, 96, 0.5);
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+        }
+
+        .stat-card {
+            background: rgba(255, 255, 255, 0.08);
+            backdrop-filter: blur(10px);
+            padding: 25px;
+            border-radius: var(--border-radius);
+            border-left: 4px solid var(--accent);
+            border: 1px solid var(--border-color);
+        }
+
+        .stat-value {
+            font-size: 2em;
+            font-weight: 800;
+            color: white;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .stat-label {
+            color: var(--text-secondary);
+            font-size: 0.9em;
+            margin-top: 5px;
+        }
+
+        .school-code-banner {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border: 2px dashed rgba(233, 69, 96, 0.4);
+            border-radius: var(--border-radius);
+            padding: 20px;
+            margin-bottom: 25px;
+            text-align: center;
+        }
+
+        .school-code-banner .invite-code {
+            font-size: 2.5em;
+            font-weight: 800;
+            letter-spacing: 8px;
+            color: white;
+            font-family: 'Courier New', monospace;
+            background: rgba(0, 0, 0, 0.3);
+            padding: 10px 20px;
+            border-radius: 8px;
+            display: inline-block;
+        }
+
+        .wallpaper-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 15px;
+            max-height: 500px;
+            overflow-y: auto;
+            padding: 15px;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: var(--border-radius);
+        }
+
+        .wallpaper-option {
+            cursor: pointer;
+            border-radius: 12px;
+            overflow: hidden;
+            border: 3px solid transparent;
+            transition: var(--transition);
+            aspect-ratio: 16/10;
+        }
+
+        .wallpaper-option:hover {
+            transform: scale(1.05);
+            border-color: var(--accent);
+        }
+
+        .wallpaper-option img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .wallpaper-option.selected {
+            border-color: var(--success);
+            box-shadow: 0 0 0 4px rgba(40, 167, 69, 0.4);
+        }
+
+        .wallpaper-option .wallpaper-label {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 5px;
+            font-size: 11px;
+            text-align: center;
+        }
+
+        .overdue {
+            background: rgba(248, 215, 218, 0.25);
+            color: #ff6b6b;
+            font-weight: bold;
+        }
+
+        .filter-badge {
+            display: inline-block;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            margin: 4px;
+            border: 1px solid var(--border-color);
+            backdrop-filter: blur(5px);
+        }
+
+        .filter-badge.active {
+            background: rgba(233, 69, 96, 0.6);
+            color: white;
+        }
+
+        .filter-badge:not(.active) {
+            background: rgba(255, 255, 255, 0.06);
+            color: var(--text-secondary);
+        }
+
+        .edit-icon {
+            cursor: pointer;
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 1.1em;
+            transition: var(--transition);
+        }
+
+        .edit-icon:hover {
+            color: var(--accent);
+            transform: scale(1.2);
+        }
+
+        .chat-container {
+            display: flex;
+            height: 600px;
+            border: 1px solid var(--border-color);
+            border-radius: var(--border-radius);
+            overflow: hidden;
+            background: rgba(0, 0, 0, 0.3);
+            backdrop-filter: blur(10px);
+        }
+
+        .chat-sidebar {
+            width: 250px;
+            background: rgba(10, 14, 39, 0.6);
+            border-right: 1px solid var(--border-color);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .chat-sidebar-header {
+            padding: 20px;
+            border-bottom: 1px solid var(--border-color);
+            color: white;
+            font-weight: 700;
+            font-size: 1.1em;
+        }
+
+        .chat-users {
+            flex: 1;
+            overflow-y: auto;
+            padding: 10px;
+        }
+
+        .chat-user {
+            padding: 12px 15px;
+            cursor: pointer;
+            border-radius: 8px;
+            margin-bottom: 5px;
+            transition: var(--transition);
+            color: var(--text-color);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .chat-user:hover,
+        .chat-user.active {
+            background: rgba(233, 69, 96, 0.3);
+        }
+
+        .chat-user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 1.2em;
+            flex-shrink: 0;
+        }
+
+        .chat-user-info {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .chat-user-name {
+            font-weight: 600;
+            font-size: 0.9em;
+        }
+
+        .chat-user-role {
+            font-size: 0.75em;
+            color: var(--text-muted);
+        }
+
+        .chat-user-status {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            flex-shrink: 0;
+        }
+
+        .chat-user-status.online {
+            background: #28a745;
+        }
+
+        .chat-main {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .chat-header {
+            padding: 20px;
+            border-bottom: 1px solid var(--border-color);
+            color: white;
+            font-weight: 700;
+        }
+
+        .chat-messages {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .chat-message {
+            display: flex;
+            gap: 10px;
+            max-width: 70%;
+        }
+
+        .chat-message.mine {
+            align-self: flex-end;
+            flex-direction: row-reverse;
+        }
+
+        .chat-message-avatar {
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 0.9em;
+            flex-shrink: 0;
+        }
+
+        .chat-message-content {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 12px 16px;
+            border-radius: 16px;
+            color: white;
+            font-size: 0.9em;
+            backdrop-filter: blur(5px);
+            border: 1px solid var(--border-color);
+        }
+
+        .chat-message.mine .chat-message-content {
+            background: rgba(233, 69, 96, 0.4);
+            border-color: rgba(233, 69, 96, 0.3);
+        }
+
+        .chat-message-time {
+            font-size: 0.7em;
+            color: var(--text-muted);
+            margin-top: 4px;
+            text-align: right;
+        }
+
+        .chat-input-area {
+            padding: 20px;
+            border-top: 1px solid var(--border-color);
+            display: flex;
+            gap: 10px;
+        }
+
+        .chat-input-area input {
+            flex: 1;
+            padding: 12px 16px;
+            border-radius: 25px;
+            border: 1px solid var(--border-color);
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            font-size: 14px;
+        }
+
+        .chat-input-area button {
+            border-radius: 50%;
+            width: 45px;
+            height: 45px;
+            padding: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2em;
+        }
+
+        .chat-badge {
+            background: var(--accent);
+            color: white;
+            border-radius: 50%;
+            padding: 2px 6px;
+            font-size: 0.65em;
+            font-weight: 700;
+            margin-left: 5px;
+        }
+
+        .system-overview {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: var(--border-radius);
+            padding: 20px;
+            margin-bottom: 25px;
+            border: 1px solid var(--border-color);
+            backdrop-filter: blur(10px);
+        }
+
+        .system-overview h3 {
+            margin-bottom: 15px;
+            border-bottom: 2px solid rgba(233, 69, 96, 0.5);
+            padding-bottom: 10px;
+        }
+
+        .system-overview-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 15px;
+        }
+
+        .system-overview-item {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+        }
+
+        .system-overview-item strong {
+            color: var(--gold-light);
+            display: block;
+            margin-bottom: 5px;
+        }
+
+        footer {
+            text-align: center;
+            padding: 20px;
+            color: var(--text-muted);
+            font-size: 12px;
+            margin-top: 20px;
+            border-top: 1px solid var(--border-color);
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 0 0 var(--border-radius) var(--border-radius);
+        }
+
+        footer .wegem-credit {
+            color: #d4af37;
+            font-weight: 700;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 10px;
+            }
+            table {
+                font-size: 11px;
+            }
+            .system-name {
+                font-size: 2em;
+                letter-spacing: 4px;
+            }
+            .logo-main {
+                width: 120px;
+                height: 120px;
+                font-size: 40px;
+            }
+            .school-code-banner .invite-code {
+                font-size: 1.5em;
+                letter-spacing: 4px;
+            }
+            .stats-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+            .chat-container {
+                flex-direction: column;
+                height: auto;
+            }
+            .chat-sidebar {
+                width: 100%;
+                max-height: 200px;
+            }
+            .chat-message {
+                max-width: 90%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="overlay" id="mainOverlay">
+        <div id="startupPage" class="startup-page">
+            <div class="startup-particles" id="startupParticles"></div>
+            <div class="startup-logo-container">
+                <div class="logo-wrapper">
+                    <div class="logo-ring"></div>
+                    <div class="logo-ring"></div>
+                    <div class="logo-main">SRMS</div>
+                </div>
+                <div class="system-name">SRMS</div>
+                <div class="system-subtitle">School Resource Management System</div>
+                <div class="credits">by <span>WeGEM</span> (Edwin)</div>
+                <div class="startup-buttons">
+                    <button class="startup-btn startup-btn-login" onclick="showStartupForm('login')">🔑 Staff Login</button>
+                    <button class="startup-btn startup-btn-signup" onclick="showStartupForm('signup')">📝 Staff Sign Up</button>
+                    <button class="startup-btn startup-btn-create" onclick="showStartupForm('create')">🏫 Create School</button>
+                </div>
+                <div id="startupFormsContainer" style="margin-top: 30px; width: 100%; max-width: 550px;"></div>
+            </div>
+        </div>
+
+        <div id="mainApp" class="hidden">
+            <div class="container">
+                <div class="main-container">
+                    <div class="center" style="margin-bottom: 20px;">
+                        <div style="display: flex; align-items: center; justify-content: center; gap: 15px; margin-bottom: 10px;">
+                            <div style="width: 50px; height: 50px; background: linear-gradient(135deg, #d4af37, #b8941f); border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 18px; font-weight: 900; color: #0a0e27;">SRMS</div>
+                            <h1 id="schoolHeader" style="margin: 0; color: white; text-shadow: 0 2px 8px rgba(0,0,0,0.6);">School Resource Management System</h1>
+                        </div>
+                        <p id="userInfo" style="color: var(--text-secondary); margin-top: 10px;"></p>
+                    </div>
+
+                    <div class="school-code-banner" id="schoolCodeBanner">
+                        <div style="font-size: 0.9em; color: var(--text-secondary); margin-bottom: 8px;">🏫 School Invite Code - Share with Staff</div>
+                        <div class="invite-code" id="dashboardInviteCode">------</div>
+                        <br>
+                        <button class="btn-gold" onclick="copyDashboardCode()">📋 Copy Code</button>
+                    </div>
+
+                    <div class="nav-buttons" id="navButtons">
+                        <button onclick="showSection('dashboardSection')" class="active-tab" data-section="dashboardSection">📊 Dashboard</button>
+                        <button onclick="showSection('bookIssuingSection')" data-section="bookIssuingSection">📖 Book Issuing</button>
+                        <button onclick="showSection('individualLendingSection')" data-section="individualLendingSection">👤 Lend Book</button>
+                        <button onclick="showSection('furnitureAllocationSection')" data-section="furnitureAllocationSection">🪑 Furniture</button>
+                        <button onclick="showSection('returnSection')" data-section="returnSection">↩️ Returns</button>
+                        <button onclick="showSection('borrowedLogSection')" data-section="borrowedLogSection">📋 Borrowed</button>
+                        <button onclick="showSection('memberManagementSection')" data-section="memberManagementSection">👥 Members</button>
+                        <button onclick="showSection('bookCatalogSection')" data-section="bookCatalogSection">📚 Catalog</button>
+                        <button onclick="showSection('teacherAllocationSection')" data-section="teacherAllocationSection">👨‍🏫 Teachers</button>
+                        <button onclick="showSection('classListManagerSection')" data-section="classListManagerSection">📋 Classes</button>
+                        <button onclick="showSection('qrSection')" data-section="qrSection">📱 QR</button>
+                        <button onclick="showSection('chatSection')" data-section="chatSection">💬 Chat <span class="chat-badge" id="unreadChatBadge" style="display:none;">0</span></button>
+                        <button onclick="showSection('systemOverviewSection')" data-section="systemOverviewSection">🔍 Overview</button>
+                        <button onclick="showSection('auditLogSection')" data-section="auditLogSection">📝 Log</button>
+                        <button onclick="showSection('reportsSection')" data-section="reportsSection">📈 Reports</button>
+                        <button onclick="showSection('wallpaperSection')" data-section="wallpaperSection">🖼️ Theme</button>
+                        <button onclick="showSection('settingsSection')" data-section="settingsSection">⚙️ Settings</button>
+                        <button class="btn-danger" onclick="logout()" style="margin-left: auto;">🚪 Logout</button>
+                    </div>
+
+                    <div id="dashboardSection" class="section">
+                        <h2>📊 Dashboard Overview</h2>
+                        <div class="stats-grid">
+                            <div class="stat-card"><div class="stat-value" id="totalBooks">0</div><div class="stat-label">Total Books</div></div>
+                            <div class="stat-card"><div class="stat-value" id="booksBorrowed">0</div><div class="stat-label">Books Borrowed</div></div>
+                            <div class="stat-card"><div class="stat-value" id="booksAvailable">0</div><div class="stat-label">Books Available</div></div>
+                            <div class="stat-card"><div class="stat-value" id="totalMembers">0</div><div class="stat-label">Members</div></div>
+                            <div class="stat-card"><div class="stat-value" id="totalTeachers">0</div><div class="stat-label">Teachers</div></div>
+                            <div class="stat-card"><div class="stat-value" id="totalFurniture">0</div><div class="stat-label">Furniture Items</div></div>
+                            <div class="stat-card"><div class="stat-value" id="overdueCount">0</div><div class="stat-label">Overdue</div></div>
+                            <div class="stat-card"><div class="stat-value" id="activeLoans">0</div><div class="stat-label">Active Loans</div></div>
+                        </div>
+                    </div>
+
+                    <div id="bookIssuingSection" class="section hidden">
+                        <h2>📖 Bulk Book Issuing to Class</h2>
+                        <div class="settings-group">
+                            <h3>Select Book & Class</h3>
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                                <div class="form-group"><label>Book:</label><select id="bookIssueSelect"></select></div>
+                                <div class="form-group"><label>Class:</label><select id="bookIssueClassSelect"></select><button class="btn-secondary" id="loadBookIssueClassBtn" style="margin-top:5px;">📋 Load</button></div>
+                                <div class="form-group"><label>Issue Date:</label><input type="date" id="bookIssueDate"></div>
+                                <div class="form-group"><label>Return Date:</label><input type="date" id="bookReturnDate"></div>
+                            </div>
+                        </div>
+                        <div class="settings-group">
+                            <h3>Assign Books</h3>
+                            <div style="display:flex;gap:10px;margin-bottom:10px;">
+                                <span class="filter-badge active" onclick="filterBookIssueTable('all')">📋 All</span>
+                                <span class="filter-badge" onclick="filterBookIssueTable('assigned')">✅ Assigned</span>
+                                <span class="filter-badge" onclick="filterBookIssueTable('unassigned')">❌ Unassigned</span>
+                            </div>
+                            <div class="scrollable-table"><table id="bookIssueTable"><thead><tr><th><input type="checkbox" id="selectAllBookIssue"></th><th>Name</th><th>ADM</th><th>Book No</th><th>Status</th></tr></thead><tbody id="bookIssueTableBody"></tbody></table></div>
+                            <button class="btn-success" id="assignBooksBtn">✅ Issue</button>
+                            <button class="btn-primary" id="bulkAssignBookNumbersBtn">🔢 Auto-Number</button>
+                        </div>
+                    </div>
+
+                    <div id="individualLendingSection" class="section hidden">
+                        <h2>👤 Individual Book Lending</h2>
+                        <div class="settings-group">
+                            <h3>Lend to Student</h3>
+                            <div style="display:grid;grid-template-columns:1fr 1fr;gap:15px;">
+                                <div class="form-group"><label>Name:</label><input type="text" id="indLendName"></div>
+                                <div class="form-group"><label>ADM:</label><input type="text" id="indLendAdm"></div>
+                                <div class="form-group"><label>Form:</label><input type="text" id="indLendForm"></div>
+                                <div class="form-group"><label>Stream:</label><input type="text" id="indLendStream"></div>
+                                <div class="form-group"><label>Book:</label><select id="indLendBook"></select></div>
+                                <div class="form-group"><label>Book No:</label><input type="text" id="indLendBookNo"></div>
+                                <div class="form-group"><label>Borrow Date:</label><input type="date" id="indLendBorrowDate"></div>
+                                <div class="form-group"><label>Return Date:</label><input type="date" id="indLendReturnDate"></div>
+                            </div>
+                            <button class="btn-success" id="individualLendBtn" style="width:100%;margin-top:15px;">📖 Lend Book</button>
+                        </div>
+                        <div class="settings-group">
+                            <h3>Recent Lendings</h3>
+                            <div style="display:flex;gap:10px;margin-bottom:10px;">
+                                <span class="filter-badge active" onclick="filterIndLendings('all')">📋 All</span>
+                                <span class="filter-badge" onclick="filterIndLendings('active')">✅ Active</span>
+                                <span class="filter-badge" onclick="filterIndLendings('returned')">↩️ Returned</span>
+                            </div>
+                            <div class="scrollable-table"><table id="individualLendingTable"><thead><tr><th>Student</th><th>ADM</th><th>Book</th><th>No</th><th>Borrowed</th><th>Due</th><th>Status</th><th>Action</th></tr></thead><tbody id="individualLendingTableBody"></tbody></table></div>
+                        </div>
+                    </div>
+
+                    <div id="furnitureAllocationSection" class="section hidden">
+                        <h2>🪑 Furniture Allocation</h2>
+                        <div class="settings-group">
+                            <h3>Load Class</h3>
+                            <div style="display:grid;grid-template-columns:1fr 1fr;gap:15px;">
+                                <div class="form-group"><label>Class:</label><select id="furnitureClassSelect"></select></div>
+                                <div class="form-group"><label>Date:</label><input type="date" id="furnitureAllocDate"></div>
+                            </div>
+                            <button class="btn-secondary" id="loadFurnitureClassBtn" style="width:100%;">📋 Load Class</button>
+                        </div>
+                        <div class="settings-group">
+                            <h3>Assign Chairs & Lockers</h3>
+                            <div style="display:flex;gap:10px;margin-bottom:10px;">
+                                <span class="filter-badge active" onclick="filterFurnitureTable('all')">📋 All</span>
+                                <span class="filter-badge" onclick="filterFurnitureTable('assigned')">✅ Allocated</span>
+                                <span class="filter-badge" onclick="filterFurnitureTable('unassigned')">❌ Pending</span>
+                            </div>
+                            <div class="scrollable-table"><table id="furnitureAllocTable"><thead><tr><th><input type="checkbox" id="selectAllFurniture"></th><th>Name</th><th>ADM</th><th>Chair</th><th>Locker</th><th>Status</th></tr></thead><tbody id="furnitureAllocTableBody"></tbody></table></div>
+                            <button class="btn-success" id="assignFurnitureBtn">✅ Assign</button>
+                            <button class="btn-primary" id="qrScanFurnitureBtn">📷 QR Scan</button>
+                        </div>
+                        <div class="settings-group">
+                            <h3>Current Allocations</h3>
+                            <div style="display:flex;gap:10px;margin-bottom:10px;">
+                                <span class="filter-badge active" onclick="filterFurnitureAssignments('all')">📋 All</span>
+                                <span class="filter-badge" onclick="filterFurnitureAssignments('active')">✅ Active</span>
+                                <span class="filter-badge" onclick="filterFurnitureAssignments('returned')">↩️ Returned</span>
+                            </div>
+                            <div class="scrollable-table"><table id="furnitureAssignmentsTable"><thead><tr><th>Student</th><th>ADM</th><th>Chair</th><th>Locker</th><th>Date</th><th>Action</th></tr></thead><tbody id="furnitureAssignmentsTableBody"></tbody></table></div>
+                            <button class="btn-export" id="exportFurnitureExcel">📎 Export</button>
+                        </div>
+                    </div>
+
+                    <div id="returnSection" class="section hidden">
+                        <h2>↩️ Return Items</h2>
+                        <div class="settings-group">
+                            <div class="form-group"><input type="text" id="returnSearchInput" placeholder="Search..."><button class="btn-primary" id="searchReturnBtn" style="margin-top:10px;">🔍 Search</button></div>
+                            <div id="returnResults"></div>
+                        </div>
+                    </div>
+
+                    <div id="borrowedLogSection" class="section hidden">
+                        <h2>📋 Borrowed Books</h2>
+                        <div style="display:flex;gap:10px;margin-bottom:10px;">
+                            <span class="filter-badge active" onclick="filterBorrowedGlobal('all')">📋 All</span>
+                            <span class="filter-badge" onclick="filterBorrowedGlobal('active')">✅ Active</span>
+                            <span class="filter-badge" onclick="filterBorrowedGlobal('overdue')">🔴 Overdue</span>
+                        </div>
+                        <div class="form-group"><input type="text" id="borrowedSearch" placeholder="Search..." oninput="renderBorrowedTable()"></div>
+                        <div class="scrollable-table"><table id="borrowedTable"><thead><tr><th>Student</th><th>ADM</th><th>Form</th><th>Stream</th><th>Book</th><th>No</th><th>Borrowed</th><th>Due</th><th>Status</th><th>Action</th></tr></thead><tbody id="borrowedTableBody"></tbody></table></div>
+                        <button class="btn-export" id="exportBorrowedExcel">📎 Export</button>
+                    </div>
+
+                    <div id="memberManagementSection" class="section hidden"><h2>👥 Members</h2><div class="settings-group" id="addMemberSection"><h3>Add Member</h3><div style="display:flex;gap:10px;"><div class="form-group" style="flex:1;"><input type="text" id="newMemberName" placeholder="Name"></div><div class="form-group" style="flex:1;"><input type="text" id="newMemberId" placeholder="ID"></div><button class="btn-primary" id="addMemberBtn">➕ Add</button></div><small>Only admins can add/remove members.</small></div><div class="form-group"><input type="text" id="memberSearch" placeholder="Search..." oninput="renderMembers()"></div><ul id="memberList" style="max-height:400px;overflow-y:auto;list-style:none;padding:0;"></ul></div>
+
+                    <div id="bookCatalogSection" class="section hidden"><h2>📚 Catalog</h2><div class="settings-group"><div style="display:grid;grid-template-columns:2fr 1fr 1fr;gap:10px;"><div class="form-group"><input type="text" id="newBookTitle" placeholder="Title"></div><div class="form-group"><select id="newBookType"><option>Textbook</option><option>Novel</option><option>Reference</option></select></div><div class="form-group"><input type="number" id="newBookQty" value="1" min="1"></div></div><button class="btn-primary" id="addBookBtn">📖 Add Book</button></div><ul id="bookCatalogList" style="max-height:400px;overflow-y:auto;list-style:none;padding:0;"></ul></div>
+
+                    <div id="dueRemindersSection" class="section hidden"><h2>⏰ Due Reminders</h2><ul id="dueRemindersList" style="list-style:none;padding:0;"></ul></div>
+
+                    <div id="teacherAllocationSection" class="section hidden"><h2>👨‍🏫 Teachers</h2><div class="settings-group" id="addTeacherSection"><h3>Add Teacher</h3><div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:10px;"><div class="form-group"><input type="text" id="teacherName" placeholder="Name"></div><div class="form-group"><input type="text" id="teacherSubject" placeholder="Subjects"></div><div class="form-group"><input type="text" id="teacherClasses" placeholder="Classes"></div><div class="form-group"><input type="text" id="teacherDuty" placeholder="Class Assigned"></div></div><button class="btn-primary" id="addTeacherBtn">➕ Add</button><small>Only admins can add/remove teachers.</small></div><div class="scrollable-table"><table id="teacherTable"><thead><tr><th>Name</th><th>Subjects</th><th>Classes</th><th>Class Assigned</th><th>Action</th></tr></thead><tbody id="teacherTableBody"></tbody></table></div></div>
+
+                    <div id="classListManagerSection" class="section hidden"><h2>📋 Class Lists</h2><div class="settings-group"><h3>Import Excel</h3><input type="file" id="classExcelInput" accept=".xlsx,.xls"><button class="btn-primary" id="importClassExcelBtn" style="margin-top:10px;">📥 Import</button><div style="margin-top:10px;display:flex;gap:10px;"><input type="text" id="saveClassName" placeholder="Class name" style="flex:1;"><button class="btn-success" id="saveClassListBtn">💾 Save</button></div></div><div class="settings-group"><h3>Saved Lists</h3><div id="savedClassListsContainer"></div></div></div>
+
+                    <div id="qrSection" class="section hidden"><h2>📱 QR Codes</h2><div class="settings-group"><h3>Generate</h3><select id="qrTypeSelect"><option value="book">Book</option><option value="chair">Chair</option><option value="locker">Locker</option></select><input type="number" id="qrStartNum" value="1" style="width:80px;"><input type="number" id="qrEndNum" value="10" style="width:80px;"><button class="btn-primary" id="generateQRCodesBtn">Generate</button><div id="qrLabelsContainer" style="display:flex;flex-wrap:wrap;gap:10px;margin-top:15px;"></div></div><div class="settings-group"><h3>Scan</h3><button class="btn-primary" id="startScannerBtn">📷 Start Scanner</button><div id="qrScannerContainer" style="max-width:500px;margin-top:15px;"></div><p id="scannedResult"></p></div></div>
+
+                    <div id="chatSection" class="section hidden">
+                        <h2>💬 Staff Chat</h2>
+                        <div class="chat-container">
+                            <div class="chat-sidebar">
+                                <div class="chat-sidebar-header">👥 Staff Online</div>
+                                <div class="chat-users" id="chatUsersList"></div>
+                            </div>
+                            <div class="chat-main">
+                                <div class="chat-header" id="chatActiveUser">Select a user to chat</div>
+                                <div class="chat-messages" id="chatMessages"></div>
+                                <div class="chat-input-area">
+                                    <input type="text" id="chatInput" placeholder="Type a message..." onkeypress="if(event.key==='Enter')sendChatMessage()">
+                                    <button class="btn-primary" onclick="sendChatMessage()">📤</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="systemOverviewSection" class="section hidden">
+                        <h2>🔍 System Overview</h2>
+                        <div class="system-overview">
+                            <h3>📊 Complete System Summary</h3>
+                            <div class="system-overview-grid" id="systemOverviewGrid"></div>
+                        </div>
+                    </div>
+
+                    <div id="auditLogSection" class="section hidden"><h2>📝 Audit Log</h2><div class="form-group"><input type="text" id="auditSearch" placeholder="Search..." oninput="renderAuditLog()"></div><div class="scrollable-table"><table id="auditLogTable"><thead><tr><th>Timestamp</th><th>User</th><th>Action</th><th>Details</th></tr></thead><tbody id="auditLogTableBody"></tbody></table></div><button class="btn-export" id="exportAuditLogBtn">📎 Export</button></div>
+
+                    <div id="reportsSection" class="section hidden"><h2>📈 Reports</h2><div class="settings-group"><select id="reportType"><option value="books">Books</option><option value="furniture">Furniture</option><option value="overdue">Overdue</option><option value="complete">Complete</option></select><button class="btn-primary" id="generateReportBtn">📊 Generate</button><div id="reportOutput" style="margin-top:15px;"></div></div></div>
+
+                    <div id="wallpaperSection" class="section hidden"><h2>🖼️ Theme</h2><div class="settings-group"><h3>🎨 Wallpapers</h3><div class="wallpaper-grid" id="wallpaperGrid"></div><button class="btn-primary" id="resetWallpaperBtn" style="margin-top:15px;">🔄 Reset</button></div><div class="settings-group"><h3>📤 Upload</h3><input type="file" id="customWallpaperInput" accept="image/*"><button class="btn-secondary" id="applyCustomWallpaperBtn">Apply</button></div></div>
+
+                    <div id="settingsSection" class="section hidden">
+                        <h2>⚙️ Settings</h2>
+                        <div class="settings-group"><h3>📧 Email</h3><div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;"><div class="form-group"><input type="text" id="emailPublicKey" placeholder="Public Key"></div><div class="form-group"><input type="text" id="emailServiceID" placeholder="Service ID"></div><div class="form-group"><input type="text" id="emailTemplateID" placeholder="Template ID"></div><div class="form-group"><input type="email" id="emailRecipient" placeholder="Recipient"></div></div><button class="btn-primary" id="saveEmailSettingsBtn">💾 Save</button></div>
+                        <div class="settings-group"><h3>💾 Data</h3><button class="btn-danger" id="clearAllDataBtn">⚠️ Clear</button><button class="btn-export" id="exportDataBtn">📥 Backup</button><button class="btn-secondary" id="importDataBtn">📤 Restore</button><input type="file" id="importFileInput" style="display:none;" accept=".json"></div>
+                        <div class="settings-group"><h3>👥 Staff</h3><div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;"><div class="form-group"><input type="email" id="newStaffEmail" placeholder="Email"></div><div class="form-group"><input type="text" id="newStaffName" placeholder="Name"></div><div class="form-group"><select id="newStaffRole"><option value="teacher">Teacher</option><option value="librarian">Librarian</option><option value="admin">Admin</option></select></div><div class="form-group"><input type="text" id="newStaffPassword" placeholder="Password (auto)"></div></div><button class="btn-primary" id="createStaffBtn">➕ Create</button><ul id="staffList"></ul></div>
+                    </div>
+
+                    <footer><p>SRMS - School Resource Management System v6.0 | <span class="wegem-credit">by WeGEM (Edwin)</span> | © 2025</p></footer>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ==================== SUPABASE CONFIGURATION ====================
+        const SUPABASE_URL = 'https://mcjkdnhbbnxvvgnjbuzy.supabase.co';
+        const SUPABASE_KEY = 'sb_publishable_UxInPN35lw3WlOvPHFqUWw_6rDmZ-sd';
+        
+        let supabase;
+        let appState = {
+            orgId: null, orgName: "", adminName: "", adminEmail: "", adminPhone: "", inviteCode: null,
+            users: [], currentUser: null, currentRole: null,
+            books: [], members: [], borrowed: [], history: [],
+            savedClassLists: {}, currentClassList: [],
+            teachers: [], furnitureAllocations: [], bookIssues: [], individualLendings: [],
+            emailSettings: { publicKey: "", serviceID: "", templateID: "", recipient: "" },
+            auditLog: [], furnitureHistory: [],
+            chatMessages: [],
+            lastReadChats: {},
+            schoolId: null
+        };
+
+        let currentFurnitureClass = [], currentBookIssueClass = [], qrScanner = null;
+        let bookIssueFilter = 'all', furnitureFilter = 'all', furnitureAssignFilter = 'all', borrowedGlobalFilter = 'all', indLendingFilter = 'all';
+        let chatActiveUser = null;
+        let chatRefreshInterval = null;
+
+        // Initialize Supabase
+        function initSupabase() {
+            if (typeof supabaseCreateClient === 'function') {
+                supabase = supabaseCreateClient(SUPABASE_URL, SUPABASE_KEY);
+                console.log('✅ Supabase initialized');
+            } else {
+                console.log('⏳ Waiting for Supabase library...');
+                setTimeout(initSupabase, 500);
+            }
+        }
+
+        // Sync data with Supabase
+        async function syncSchoolData() {
+            if (!supabase || !appState.schoolId) return;
+            
+            try {
+                await supabase.from('schools').upsert({
+                    id: appState.schoolId,
+                    org_id: appState.orgId,
+                    org_name: appState.orgName,
+                    admin_name: appState.adminName,
+                    admin_email: appState.adminEmail,
+                    admin_phone: appState.adminPhone,
+                    invite_code: appState.inviteCode,
+                    school_address: appState.schoolAddress || ''
+                });
+            } catch (e) {
+                console.warn('Sync error:', e);
+            }
+        }
+
+        // Load data from Supabase
+        async function loadSchoolData(inviteCode) {
+            if (!supabase) return null;
+            
+            const { data: schools, error } = await supabase
+                .from('schools')
+                .select('*')
+                .eq('invite_code', inviteCode)
+                .single();
+            
+            if (error || !schools) return null;
+            
+            const schoolId = schools.id;
+            const { data: users } = await supabase.from('users').select('*').eq('school_id', schoolId);
+            const { data: books } = await supabase.from('books').select('*').eq('school_id', schoolId);
+            const { data: members } = await supabase.from('members').select('*').eq('school_id', schoolId);
+            const { data: borrowed } = await supabase.from('borrowed').select('*').eq('school_id', schoolId);
+            const { data: teachers } = await supabase.from('teachers').select('*').eq('school_id', schoolId);
+            const { data: furniture } = await supabase.from('furniture_allocations').select('*').eq('school_id', schoolId);
+            const { data: classLists } = await supabase.from('class_lists').select('*').eq('school_id', schoolId);
+            const { data: auditLogs } = await supabase.from('audit_logs').select('*').eq('school_id', schoolId);
+            const { data: chatMessages } = await supabase.from('chat_messages').select('*').eq('school_id', schoolId);
+            
+            const savedClassLists = {};
+            (classLists || []).forEach(cl => {
+                savedClassLists[cl.class_name] = cl.students;
+            });
+            
+            return {
+                orgId: schools.org_id,
+                orgName: schools.org_name,
+                adminName: schools.admin_name,
+                adminEmail: schools.admin_email,
+                adminPhone: schools.admin_phone,
+                inviteCode: schools.invite_code,
+                schoolAddress: schools.school_address,
+                schoolId: schoolId,
+                users: (users || []).map(u => ({
+                    code: schools.invite_code,
+                    name: u.name,
+                    email: u.email,
+                    phone: u.phone,
+                    role: u.role,
+                    password: u.password,
+                    staffId: u.staff_id
+                })),
+                books: (books || []).map(b => ({
+                    title: b.title,
+                    type: b.type,
+                    quantity: b.quantity
+                })),
+                members: (members || []).map(m => ({
+                    name: m.name,
+                    id: m.member_id
+                })),
+                borrowed: (borrowed || []).map(b => ({
+                    id: b.id,
+                    name: b.name,
+                    adm: b.adm,
+                    bookTitle: b.book_title,
+                    bookNo: b.book_no,
+                    borrowDate: b.borrow_date,
+                    returnDate: b.return_date,
+                    returned: b.returned,
+                    actualReturnDate: b.actual_return_date,
+                    form: b.form,
+                    stream: b.stream,
+                    type: b.type
+                })),
+                teachers: (teachers || []).map(t => ({
+                    name: t.name,
+                    subject: t.subject,
+                    classes: t.classes,
+                    duty: t.duty
+                })),
+                furnitureAllocations: (furniture || []).map(f => ({
+                    id: f.id,
+                    name: f.name,
+                    adm: f.adm,
+                    chair: f.chair,
+                    locker: f.locker,
+                    date: f.date,
+                    returned: f.returned,
+                    returnDate: f.return_date
+                })),
+                savedClassLists,
+                auditLog: (auditLogs || []).map(a => ({
+                    timestamp: a.timestamp,
+                    user: a.username,
+                    action: a.action,
+                    details: a.details
+                })),
+                chatMessages: (chatMessages || []).map(c => ({
+                    id: c.id,
+                    from: c.from_user,
+                    to: c.to_user,
+                    message: c.message,
+                    timestamp: c.created_at,
+                    read: c.read
+                })),
+                history: [],
+                bookIssues: [],
+                individualLendings: [],
+                furnitureHistory: [],
+                emailSettings: { publicKey: "", serviceID: "", templateID: "", recipient: "" },
+                lastReadChats: {}
+            };
+        }
+
+        function saveState() {
+            localStorage.setItem('schoolSystemV6', JSON.stringify(appState));
+            syncSchoolData().catch(console.error);
+        }
+
+        function showNotification(msg, type = 'info') {
+            const n = document.createElement('div');
+            n.className = `notification ${type}`;
+            n.textContent = msg;
+            document.body.appendChild(n);
+            setTimeout(() => { n.style.opacity = '0'; n.style.transform = 'translateX(100%)'; setTimeout(() => n.remove(), 300); }, 3500);
+        }
+
+        function generateInviteCode() { return Math.random().toString(36).substring(2, 10).toUpperCase(); }
+        function isAdmin() { return appState.currentRole === 'admin'; }
+
+        function addAuditEntry(action, details) {
+            appState.auditLog.push({ timestamp: new Date().toISOString(), user: appState.currentUser ? appState.currentUser.name : 'System', action, details });
+            if (appState.auditLog.length > 500) appState.auditLog = appState.auditLog.slice(-500);
+            saveState();
+        }
+
+        function createStartupParticles() {
+            const container = document.getElementById('startupParticles');
+            if (!container) return;
+            for (let i = 0; i < 30; i++) {
+                const p = document.createElement('div');
+                p.className = 'startup-particle';
+                const size = Math.random() * 60 + 20;
+                p.style.cssText = `width:${size}px;height:${size}px;left:${Math.random()*100}%;animation-delay:${Math.random()*15}s;animation-duration:${Math.random()*20+10}s`;
+                container.appendChild(p);
+            }
+        }
+
+        function showStartupForm(type) {
+            const c = document.getElementById('startupFormsContainer');
+            const g = 'background:rgba(255,255,255,0.08);backdrop-filter:blur(20px);border-radius:16px;padding:30px;border:1px solid rgba(255,255,255,0.2);';
+            const is = 'background:rgba(255,255,255,0.15);border-color:rgba(255,255,255,0.3);color:white;';
+            const ls = 'color:rgba(255,255,255,0.8);';
+            if (type === 'login') {
+                c.innerHTML = `<div style="${g}"><h3 style="color:white;margin-bottom:20px;">🔐 Staff Login</h3>
+                <div class="form-group"><label style="${ls}">👤 Your Full Name:</label><input id="sl0" style="${is}" placeholder="Enter your registered name"></div>
+                <div class="form-group"><label style="${ls}">🏢 School Name:</label><input id="sl1" style="${is}"></div>
+                <div class="form-group"><label style="${ls}">🔑 Invite Code:</label><input id="sl2" style="${is}"></div>
+                <div class="form-group"><label style="${ls}">🔒 Password:</label><input type="password" id="sl3" style="${is}"></div>
+                <button class="startup-btn startup-btn-login" onclick="handleStartupLogin()" style="width:100%;">🔑 Login</button></div>`;
+            } else if (type === 'signup') {
+                c.innerHTML = `<div style="${g}"><h3 style="color:white;margin-bottom:20px;">📝 Staff Sign Up</h3>
+                <p style="color:rgba(255,255,255,0.6);margin-bottom:15px;">Join your school's management system</p>
+                <div class="form-group"><label style="${ls}">👤 Full Name:</label><input id="ss0" style="${is}" placeholder="Your full name"></div>
+                <div class="form-group"><label style="${ls}">📧 Email Address:</label><input type="email" id="ss4" style="${is}" placeholder="your@email.com"></div>
+                <div class="form-group"><label style="${ls}">📞 Phone Number:</label><input type="tel" id="ss6" style="${is}" placeholder="+1234567890"></div>
+                <div class="form-group"><label style="${ls}">🏢 School Name:</label><input id="ss1" style="${is}"></div>
+                <div class="form-group"><label style="${ls}">🔑 Invite Code:</label><input id="ss2" style="${is}" placeholder="From your admin"></div>
+                <div class="form-group"><label style="${ls}">👤 Staff ID (Optional):</label><input id="ss7" style="${is}" placeholder="Employee/Staff ID"></div>
+                <div class="form-group"><label style="${ls}">🔒 Create Password:</label><input type="password" id="ss5" style="${is}" placeholder="Min 6 characters"></div>
+                <button class="startup-btn startup-btn-signup" onclick="handleStartupSignup()" style="width:100%;">📝 Sign Up</button></div>`;
+            } else if (type === 'create') {
+                c.innerHTML = `<div style="${g}"><h3 style="color:white;margin-bottom:20px;">🏫 Create New School</h3>
+                <p style="color:rgba(255,255,255,0.6);margin-bottom:15px;">Set up your school's management system</p>
+                <div class="form-group"><label style="${ls}">🏢 School Name:</label><input id="sc1" style="${is}" placeholder="e.g., Sunshine High School"></div>
+                <div class="form-group"><label style="${ls}">📍 School Address:</label><input id="sc7" style="${is}" placeholder="School location"></div>
+                <div class="form-group"><label style="${ls}">👤 Admin Full Name:</label><input id="sc2" style="${is}"></div>
+                <div class="form-group"><label style="${ls}">📧 Admin Email:</label><input type="email" id="sc3" style="${is}"></div>
+                <div class="form-group"><label style="${ls}">📞 Admin Phone:</label><input type="tel" id="sc4" style="${is}"></div>
+                <div class="form-group"><label style="${ls}">🔒 Password:</label><input type="password" id="sc5" style="${is}" placeholder="Min 8 characters"></div>
+                <div class="form-group"><label style="${ls}">🔒 Confirm Password:</label><input type="password" id="sc6" style="${is}"></div>
+                <button class="startup-btn startup-btn-create" onclick="handleStartupCreate()" style="width:100%;">🚀 Create School</button></div>`;
+            }
+            c.scrollIntoView({ behavior: 'smooth' });
+        }
+
+        async function handleStartupCreate() {
+            const org = document.getElementById('sc1').value.trim();
+            const address = document.getElementById('sc7')?.value.trim() || '';
+            const admin = document.getElementById('sc2').value.trim();
+            const email = document.getElementById('sc3').value.trim();
+            const phone = document.getElementById('sc4').value.trim();
+            const pw = document.getElementById('sc5').value;
+            const pw2 = document.getElementById('sc6').value;
+            
+            if (!org || !admin || !email || !pw) { showNotification("Fill required fields", "error"); return; }
+            if (pw !== pw2) { showNotification("Passwords don't match", "error"); return; }
+            if (pw.length < 8) { showNotification("Password min 8 chars", "error"); return; }
+            
+            const code = generateInviteCode();
+            
+            if (supabase) {
+                const { data: schoolData, error } = await supabase
+                    .from('schools')
+                    .insert({
+                        org_id: Date.now().toString(),
+                        org_name: org,
+                        admin_name: admin,
+                        admin_email: email,
+                        admin_phone: phone,
+                        invite_code: code,
+                        school_address: address
+                    })
+                    .select()
+                    .single();
+                
+                if (error) {
+                    showNotification("Failed to create school: " + error.message, "error");
+                    return;
+                }
+                
+                appState.schoolId = schoolData.id;
+            }
+            
+            Object.assign(appState, {
+                orgId: Date.now().toString(), orgName: org, adminName: admin, adminEmail: email,
+                adminPhone: phone, inviteCode: code, schoolAddress: address,
+                users: [{ code, name: admin, email, phone, role: 'admin', password: pw, staffId: 'ADMIN-001' }],
+                currentUser: { name: admin, role: 'admin', email, phone, staffId: 'ADMIN-001' },
+                currentRole: 'admin'
+            });
+            
+            saveState();
+            addAuditEntry('School Created', `${org} by ${admin}`);
+            showNotification(`School created! Code: ${code}`, 'success');
+            launchApp();
+        }
+
+        async function handleStartupSignup() {
+            const name = document.getElementById('ss0').value.trim();
+            const email = document.getElementById('ss4').value.trim();
+            const phone = document.getElementById('ss6').value.trim();
+            const org = document.getElementById('ss1').value.trim();
+            const code = document.getElementById('ss2').value.trim().toUpperCase();
+            const staffId = document.getElementById('ss7').value.trim();
+            const pw = document.getElementById('ss5').value;
+            
+            if (!name || !email || !org || !code || !pw) { showNotification("Fill required fields: name, email, school, code, password", "error"); return; }
+            if (pw.length < 6) { showNotification("Password min 6 chars", "error"); return; }
+            
+            if (appState.orgName !== org) {
+                const schoolData = await loadSchoolData(code);
+                if (!schoolData || schoolData.orgName !== org) {
+                    showNotification("School not found", "error");
+                    return;
+                }
+                Object.assign(appState, schoolData);
+            }
+            
+            if (appState.inviteCode !== code) { showNotification("Invalid invite code", "error"); return; }
+            if (appState.users.find(u => u.email === email)) { showNotification("Email already registered", "error"); return; }
+            
+            const newUser = { code, name, email, phone, staffId, role: 'teacher', password: pw };
+            appState.users.push(newUser);
+            appState.currentUser = { name, role: 'teacher', email, phone, staffId };
+            appState.currentRole = 'teacher';
+            
+            saveState();
+            addAuditEntry('Signup', `${name} signed up as teacher`);
+            launchApp();
+        }
+
+        async function handleStartupLogin() {
+            const name = document.getElementById('sl0')?.value.trim();
+            const org = document.getElementById('sl1').value.trim();
+            const code = document.getElementById('sl2').value.trim().toUpperCase();
+            const pw = document.getElementById('sl3').value;
+            
+            if (!name || !org || !code || !pw) { showNotification("Fill all fields including your name", "error"); return; }
+            
+            if (appState.orgName !== org || appState.inviteCode !== code) {
+                const schoolData = await loadSchoolData(code);
+                if (schoolData && schoolData.orgName === org) {
+                    Object.assign(appState, schoolData);
+                } else {
+                    showNotification("School not found", "error");
+                    return;
+                }
+            }
+            
+            const user = appState.users.find(u => u.code === code && u.name.toLowerCase() === name.toLowerCase());
+            if (!user || user.password !== pw) { showNotification("Invalid credentials. Check your name, code and password.", "error"); return; }
+            
+            appState.currentUser = { name: user.name, role: user.role, email: user.email, phone: user.phone, staffId: user.staffId };
+            appState.currentRole = user.role;
+            
+            saveState();
+            addAuditEntry('Login', `${user.name} logged in as ${user.role}`);
+            launchApp();
+        }
+
+        function launchApp() {
+            document.getElementById('startupPage').classList.add('hidden');
+            document.getElementById('mainApp').classList.remove('hidden');
+            document.getElementById('schoolHeader').textContent = appState.orgName;
+            document.getElementById('userInfo').innerHTML = `👤 ${appState.currentUser.name} <span class="role-badge role-${appState.currentRole}">${appState.currentRole.toUpperCase()}</span>${appState.currentUser.staffId ? ` | ID: ${appState.currentUser.staffId}` : ''}`;
+            document.getElementById('dashboardInviteCode').textContent = appState.inviteCode || '------';
+            loadWallpaper();
+            renderAll();
+            startChatRefresh();
+        }
+
+        window.copyDashboardCode = () => { navigator.clipboard.writeText(appState.inviteCode); showNotification("Code copied!", "success"); };
+
+        function showSection(id) {
+            document.querySelectorAll('.section').forEach(s => s.classList.add('hidden'));
+            const section = document.getElementById(id);
+            if (section) section.classList.remove('hidden');
+            document.querySelectorAll('.nav-buttons button[data-section]').forEach(btn => btn.classList.toggle('active-tab', btn.dataset.section === id));
+            if (qrScanner) { qrScanner.stop().catch(() => {}); qrScanner = null; document.getElementById('qrScannerContainer').innerHTML = ''; document.getElementById('startScannerBtn').textContent = '📷 Start Scanner'; }
+            if (id === 'chatSection') { renderChatUsers(); renderChatMessages(); } else { stopChatRefresh(); }
+            const refreshers = {
+                'dashboardSection': updateDashboard,
+                'borrowedLogSection': renderBorrowedTable,
+                'dueRemindersSection': renderDueReminders,
+                'memberManagementSection': () => { renderMembers(); toggleMemberAdminControls(); },
+                'bookCatalogSection': renderBookCatalog,
+                'teacherAllocationSection': () => { renderTeachers(); toggleTeacherAdminControls(); },
+                'furnitureAllocationSection': () => { renderFurnitureAssignments(); renderFurnitureAllocTable(); },
+                'bookIssuingSection': () => { populateBookIssueSelect(); renderBookIssueTable(); },
+                'individualLendingSection': () => { populateIndLendBookSelect(); renderIndividualLendings(); },
+                'classListManagerSection': renderSavedClassLists,
+                'settingsSection': renderStaffList,
+                'auditLogSection': renderAuditLog,
+                'systemOverviewSection': renderSystemOverview
+            };
+            if (refreshers[id]) refreshers[id]();
+        }
+
+        function toggleMemberAdminControls() { document.getElementById('addMemberSection').style.display = isAdmin() ? 'block' : 'none'; }
+        function toggleTeacherAdminControls() { document.getElementById('addTeacherSection').style.display = isAdmin() ? 'block' : 'none'; }
+
+        function startChatRefresh() {
+            stopChatRefresh();
+            if (document.getElementById('chatSection') && !document.getElementById('chatSection').classList.contains('hidden')) {
+                chatRefreshInterval = setInterval(() => { renderChatMessages(); renderChatUsers(); updateUnreadBadge(); }, 3000);
+            }
+        }
+
+        function stopChatRefresh() { if (chatRefreshInterval) { clearInterval(chatRefreshInterval); chatRefreshInterval = null; } }
+
+        function renderChatUsers() {
+            const container = document.getElementById('chatUsersList');
+            if (!container) return;
+            const otherUsers = appState.users.filter(u => u.name !== appState.currentUser?.name);
+            container.innerHTML = otherUsers.map(u => {
+                const unread = appState.chatMessages.filter(m => m.from === u.name && m.to === appState.currentUser?.name && !m.read).length;
+                return `<div class="chat-user ${chatActiveUser === u.name ? 'active' : ''}" onclick="selectChatUser('${u.name}')">
+                    <div class="chat-user-avatar" style="background:linear-gradient(135deg, ${getAvatarColor(u.name)}, ${getAvatarColor(u.name+'2')})">${u.name[0].toUpperCase()}</div>
+                    <div class="chat-user-info"><div class="chat-user-name">${u.name} ${unread ? `<span class="chat-badge">${unread}</span>` : ''}</div><div class="chat-user-role">${u.role}</div></div>
+                    <div class="chat-user-status online"></div>
+                </div>`;
+            }).join('') || '<p style="color:var(--text-muted);padding:20px;">No other staff members</p>';
+        }
+
+        function selectChatUser(username) {
+            chatActiveUser = username;
+            document.getElementById('chatActiveUser').textContent = `💬 Chat with ${username}`;
+            document.getElementById('chatInput').disabled = false;
+            appState.chatMessages.forEach(m => { if (m.from === username && m.to === appState.currentUser?.name) m.read = true; });
+            saveState();
+            renderChatUsers();
+            renderChatMessages();
+            updateUnreadBadge();
+        }
+
+        function sendChatMessage() {
+            const input = document.getElementById('chatInput');
+            const message = input.value.trim();
+            if (!message || !chatActiveUser) return;
+            appState.chatMessages.push({
+                id: Date.now(),
+                from: appState.currentUser.name,
+                to: chatActiveUser,
+                message,
+                timestamp: new Date().toISOString(),
+                read: false
+            });
+            saveState();
+            input.value = '';
+            renderChatMessages();
+            renderChatUsers();
+        }
+
+        function renderChatMessages() {
+            const container = document.getElementById('chatMessages');
+            if (!container) return;
+            if (!chatActiveUser) { container.innerHTML = '<p style="color:var(--text-muted);text-align:center;padding:40px;">Select a staff member to start chatting</p>'; return; }
+            const msgs = appState.chatMessages.filter(m =>
+                (m.from === appState.currentUser?.name && m.to === chatActiveUser) ||
+                (m.from === chatActiveUser && m.to === appState.currentUser?.name)
+            ).sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
+            container.innerHTML = msgs.map(m => {
+                const isMine = m.from === appState.currentUser?.name;
+                return `<div class="chat-message ${isMine ? 'mine' : ''}">
+                    <div class="chat-message-avatar" style="background:linear-gradient(135deg, ${getAvatarColor(m.from)}, ${getAvatarColor(m.from+'2')})">${m.from[0].toUpperCase()}</div>
+                    <div class="chat-message-content">${m.message}<div class="chat-message-time">${new Date(m.timestamp).toLocaleTimeString()}</div></div>
+                </div>`;
+            }).join('');
+            container.scrollTop = container.scrollHeight;
+        }
+
+        function updateUnreadBadge() {
+            const badge = document.getElementById('unreadChatBadge');
+            if (!badge) return;
+            const unread = appState.chatMessages.filter(m => m.to === appState.currentUser?.name && !m.read).length;
+            if (unread > 0) { badge.textContent = unread; badge.style.display = 'inline-block'; } else { badge.style.display = 'none'; }
+        }
+
+        function getAvatarColor(name) {
+            const colors = ['#e94560', '#0f3460', '#28a745', '#ffc107', '#17a2b8', '#6610f2', '#fd7e14', '#20c997'];
+            let hash = 0;
+            for (let i = 0; i < name.length; i++) hash = name.charCodeAt(i) + ((hash << 5) - hash);
+            return colors[Math.abs(hash) % colors.length];
+        }
+
+        function renderSystemOverview() {
+            const container = document.getElementById('systemOverviewGrid');
+            if (!container) return;
+            const totalBooks = appState.books.reduce((s, b) => s + b.quantity, 0);
+            const activeLoans = appState.borrowed.filter(b => !b.returned).length;
+            const overdue = appState.borrowed.filter(b => !b.returned && new Date(b.returnDate) < new Date()).length;
+            const activeFurniture = appState.furnitureAllocations.filter(f => !f.returned).length;
+            const totalUsers = appState.users.length;
+            const totalMessages = appState.chatMessages.length;
+
+            container.innerHTML = `
+                <div class="system-overview-item"><strong>🏫 School</strong>${appState.orgName}${appState.schoolAddress ? `<br>📍 ${appState.schoolAddress}` : ''}<br>👤 Admin: ${appState.adminName}<br>📧 ${appState.adminEmail}</div>
+                <div class="system-overview-item"><strong>📚 Books</strong>Total: ${totalBooks}<br>Active Loans: ${activeLoans}<br>Overdue: ${overdue}<br>Available: ${totalBooks - activeLoans}</div>
+                <div class="system-overview-item"><strong>🪑 Furniture</strong>Active Allocations: ${activeFurniture}<br>Chairs: ${appState.furnitureAllocations.filter(f=>!f.returned&&f.chair).length}<br>Lockers: ${appState.furnitureAllocations.filter(f=>!f.returned&&f.locker).length}</div>
+                <div class="system-overview-item"><strong>👥 People</strong>Staff: ${totalUsers}<br>Teachers: ${appState.teachers.length}<br>Members: ${appState.members.length}<br>Classes: ${Object.keys(appState.savedClassLists).length}</div>
+                <div class="system-overview-item"><strong>💬 Communication</strong>Messages: ${totalMessages}<br>Active Chats: ${new Set(appState.chatMessages.map(m=>m.from+'-'+m.to)).size}<br>Invite Code: ${appState.inviteCode}</div>
+                <div class="system-overview-item"><strong>📝 Activity</strong>Log Entries: ${appState.auditLog.length}<br>Books Issued: ${appState.bookIssues.length}<br>Individual Lends: ${appState.individualLendings.length}<br>Furniture Records: ${appState.furnitureAllocations.length}</div>
+            `;
+        }
+
+        function updateDashboard() {
+            const tb = appState.books.reduce((s, b) => s + b.quantity, 0);
+            const bb = appState.borrowed.filter(b => !b.returned).length;
+            document.getElementById('totalBooks').textContent = tb;
+            document.getElementById('booksBorrowed').textContent = bb;
+            document.getElementById('booksAvailable').textContent = tb - bb;
+            document.getElementById('totalMembers').textContent = appState.members.length;
+            document.getElementById('totalTeachers').textContent = appState.teachers.length;
+            document.getElementById('totalFurniture').textContent = appState.furnitureAllocations.filter(f => !f.returned).length;
+            const ov = appState.borrowed.filter(b => !b.returned && new Date(b.returnDate) < new Date()).length;
+            document.getElementById('overdueCount').textContent = ov;
+            document.getElementById('activeLoans').textContent = appState.borrowed.filter(b => !b.returned).length;
+        }
+
+        window.filterBookIssueTable = (f) => { bookIssueFilter = f; updateBadges('bookIssuingSection .settings-group:nth-child(2) .filter-badge', f); renderBookIssueTable(); };
+        window.filterFurnitureTable = (f) => { furnitureFilter = f; updateBadges('furnitureAllocationSection .settings-group:nth-child(2) .filter-badge', f); renderFurnitureAllocTable(); };
+        window.filterFurnitureAssignments = (f) => { furnitureAssignFilter = f; updateBadges('furnitureAllocationSection .settings-group:nth-child(3) .filter-badge', f); renderFurnitureAssignments(); };
+        window.filterBorrowedGlobal = (f) => { borrowedGlobalFilter = f; updateBadges('borrowedLogSection .filter-badge', f); renderBorrowedTable(); };
+        window.filterIndLendings = (f) => { indLendingFilter = f; updateBadges('individualLendingSection .filter-badge', f); renderIndividualLendings(); };
+
+        function updateBadges(sel, active) { document.querySelectorAll(sel).forEach(b => b.classList.remove('active')); document.querySelector(`${sel}[onclick*="${active}"]`)?.classList.add('active'); }
+
+        function renderAuditLog() {
+            const tbody = document.getElementById('auditLogTableBody');
+            if (!tbody) return;
+            const search = document.getElementById('auditSearch')?.value.toLowerCase() || '';
+            tbody.innerHTML = [...appState.auditLog].reverse().slice(0, 100).filter(e => !search || e.action.toLowerCase().includes(search) || e.details.toLowerCase().includes(search) || e.user.toLowerCase().includes(search)).map(entry =>
+                `<tr><td>${new Date(entry.timestamp).toLocaleString()}</td><td>${entry.user}</td><td>${entry.action}</td><td>${entry.details}</td></tr>`
+            ).join('');
+        }
+
+        function populateBookIssueSelect() { const sel = document.getElementById('bookIssueSelect'); if (sel) sel.innerHTML = '<option value="">-- Select --</option>' + appState.books.filter(b => b.quantity > 0).map(b => `<option value="${b.title}">${b.title} (${b.quantity})</option>`).join(''); }
+
+        function loadClassForBookIssue() { const cn = document.getElementById('bookIssueClassSelect').value; if (!cn || !appState.savedClassLists[cn]) { showNotification("Select class", "error"); return; } currentBookIssueClass = JSON.parse(JSON.stringify(appState.savedClassLists[cn])); renderBookIssueTable(); }
+
+        function renderBookIssueTable() { const tbody = document.getElementById('bookIssueTableBody'); if (!tbody) return; tbody.innerHTML = ''; currentBookIssueClass.forEach((s, i) => { const ex = appState.bookIssues.find(x => x.adm === s.adm && !x.returned); const done = !!ex; if ((bookIssueFilter === 'assigned' && !done) || (bookIssueFilter === 'unassigned' && done)) return; tbody.innerHTML += `<tr><td><input type="checkbox" class="bookIssueCheckbox" data-idx="${i}" ${done?'disabled':''}></td><td>${s.name}</td><td>${s.adm}</td><td><input type="text" id="bookNo-${i}" value="${ex?ex.bookNo:''}" ${done?'readonly':''}></td><td>${done?'✓ Issued':'Pending'}</td></tr>`; }); }
+
+        function populateIndLendBookSelect() { const sel = document.getElementById('indLendBook'); if (sel) sel.innerHTML = '<option value="">-- Select --</option>' + appState.books.filter(b => b.quantity > 0).map(b => `<option value="${b.title}">${b.title} (${b.quantity})</option>`).join(''); }
+
+        function renderIndividualLendings() { const tbody = document.getElementById('individualLendingTableBody'); if (!tbody) return; const all = [...appState.individualLendings, ...appState.bookIssues]; let filtered = indLendingFilter === 'active' ? all.filter(l => !l.returned) : indLendingFilter === 'returned' ? all.filter(l => l.returned) : all; filtered.sort((a, b) => new Date(b.borrowDate || 0) - new Date(a.borrowDate || 0)); tbody.innerHTML = filtered.slice(0, 50).map(l => `<tr><td>${l.name}</td><td>${l.adm}</td><td>${l.bookTitle||'-'}</td><td>${l.bookNo||'-'}</td><td>${l.borrowDate||'-'}</td><td>${l.returnDate||'-'}</td><td>${l.returned?'Returned':'Active'}</td><td>${!l.returned?`<button onclick="returnBookById('${l.id}')" class="btn-success">Return</button>`:'-'}</td></tr>`).join(''); }
+
+        function loadClassForFurniture() { const cn = document.getElementById('furnitureClassSelect').value; if (!cn || !appState.savedClassLists[cn]) { showNotification("Select class", "error"); return; } currentFurnitureClass = JSON.parse(JSON.stringify(appState.savedClassLists[cn])); renderFurnitureAllocTable(); }
+
+        function renderFurnitureAllocTable() { const tbody = document.getElementById('furnitureAllocTableBody'); if (!tbody) return; tbody.innerHTML = ''; currentFurnitureClass.forEach((s, i) => { const ex = appState.furnitureAllocations.find(f => f.adm === s.adm && !f.returned); const done = !!ex; if ((furnitureFilter === 'assigned' && !done) || (furnitureFilter === 'unassigned' && done)) return; tbody.innerHTML += `<tr><td><input type="checkbox" class="furnitureCheckbox" data-idx="${i}" ${done?'disabled':''}></td><td>${s.name}</td><td>${s.adm}</td><td><input type="text" id="chairNo-${i}" value="${ex?ex.chair:''}" ${done?'readonly':''}></td><td><input type="text" id="lockerNo-${i}" value="${ex?ex.locker:''}" ${done?'readonly':''}></td><td>${done?'✓ Allocated':'Pending'}</td></tr>`; }); }
+
+        function renderFurnitureAssignments() { const tbody = document.getElementById('furnitureAssignmentsTableBody'); if (!tbody) return; let data = furnitureAssignFilter === 'active' ? appState.furnitureAllocations.filter(f => !f.returned) : furnitureAssignFilter === 'returned' ? appState.furnitureAllocations.filter(f => f.returned) : appState.furnitureAllocations; tbody.innerHTML = data.map(f => `<tr><td>${f.name}</td><td>${f.adm}</td><td>${f.chair||'-'}</td><td>${f.locker||'-'}</td><td>${f.date}</td><td>${!f.returned?`<button onclick="returnFurnitureById('${f.id}')" class="btn-success">Return</button>`:'Returned'}</td></tr>`).join(''); }
+
+        window.returnFurnitureById = (id) => { const item = appState.furnitureAllocations.find(f => f.id === id); if (item && !item.returned) { item.returned = true; item.returnDate = new Date().toISOString().split('T')[0]; appState.furnitureHistory.push({ ...item }); saveState(); addAuditEntry('Furniture Return', item.name); renderFurnitureAssignments(); renderFurnitureAllocTable(); updateDashboard(); showNotification("Returned!", "success"); } };
+
+        window.returnBookById = (id) => { const rec = appState.borrowed.find(b => b.id === id); if (rec && !rec.returned) { rec.returned = true; rec.actualReturnDate = new Date().toISOString().split('T')[0]; appState.history.push({ ...rec }); const book = appState.books.find(b => b.title === rec.bookTitle); if (book) book.quantity++; const ii = appState.bookIssues.findIndex(i => i.id === id); if (ii > -1) appState.bookIssues[ii].returned = true; const il = appState.individualLendings.findIndex(i => i.id === id); if (il > -1) appState.individualLendings[il].returned = true; saveState(); addAuditEntry('Book Return', `${rec.name} returned ${rec.bookTitle}`); renderBorrowedTable(); renderIndividualLendings(); updateDashboard(); showNotification("Book returned!", "success"); } };
+
+        function renderBorrowedTable() { const tbody = document.getElementById('borrowedTableBody'); if (!tbody) return; const search = document.getElementById('borrowedSearch')?.value.toLowerCase() || ''; const today = new Date(); tbody.innerHTML = ''; appState.borrowed.forEach(b => { if (borrowedGlobalFilter === 'active' && b.returned) return; if (borrowedGlobalFilter === 'overdue' && (b.returned || new Date(b.returnDate) >= today)) return; if (search && !b.name.toLowerCase().includes(search) && !b.adm.includes(search) && !b.bookTitle.toLowerCase().includes(search)) return; const isOv = !b.returned && new Date(b.returnDate) < today; tbody.innerHTML += `<tr><td>${b.name}</td><td>${b.adm}</td><td>${b.form||'-'}</td><td>${b.stream||'-'}</td><td>${b.bookTitle}</td><td>${b.bookNo||'-'}</td><td>${b.borrowDate}</td><td class="${isOv?'overdue':''}">${b.returnDate}</td><td>${b.returned?'Returned':(isOv?'🔴 OVERDUE':'Active')}</td><td>${!b.returned?`<button onclick="returnBookById('${b.id}')" class="btn-success">Return</button>`:'-'}</td></tr>`; }); }
+
+        function renderDueReminders() { const c = document.getElementById('dueRemindersList'); if (!c) return; c.innerHTML = ''; const today = new Date(); let has = false; appState.borrowed.filter(b => !b.returned).forEach(b => { const days = Math.ceil((new Date(b.returnDate) - today) / 86400000); if (days < 0) { has = true; c.innerHTML += `<li style="color:#ff6b6b;padding:10px;background:rgba(248,215,218,0.2);margin:5px 0;border-radius:8px;">🔴 OVERDUE: ${b.name} - ${b.bookTitle} (#${b.bookNo})</li>`; } else if (days <= 3) { has = true; c.innerHTML += `<li style="color:#ffc107;padding:10px;background:rgba(255,243,205,0.15);margin:5px 0;border-radius:8px;">🟡 Due in ${days}d: ${b.name} - ${b.bookTitle}</li>`; } }); if (!has) c.innerHTML = '<li style="padding:30px;text-align:center;color:#28a745;font-size:1.2em;">✅ All clear!</li>'; }
+
+        function renderMembers() { const c = document.getElementById('memberList'); if (!c) return; const search = document.getElementById('memberSearch')?.value.toLowerCase() || ''; c.innerHTML = appState.members.filter(m => !search || m.name.toLowerCase().includes(search) || m.id?.toLowerCase().includes(search)).map((m, i) => `<li style="padding:10px;border-bottom:1px solid var(--border-color);display:flex;justify-content:space-between;"><span><strong>${m.name}</strong> ${m.id?`(${m.id})`:''}</span>${isAdmin()?`<button onclick="deleteMember(${i})" class="btn-danger" style="padding:5px 10px;">🗑️</button>`:`<span class="edit-icon" onclick="editMemberInline(${i})">✏️</span>`}</li>`).join(''); toggleMemberAdminControls(); }
+
+        window.deleteMember = (i) => { if (!isAdmin()) return; const n = appState.members[i]?.name; if (confirm(`Delete ${n}?`)) { appState.members.splice(i, 1); saveState(); renderMembers(); updateDashboard(); } };
+        window.editMemberInline = (i) => { const m = appState.members[i]; const nn = prompt("Name:", m.name); if (nn) m.name = nn.trim(); const ni = prompt("ID:", m.id || ''); if (ni !== null) m.id = ni.trim() || m.id; saveState(); renderMembers(); showNotification("Updated!", "success"); };
+
+        function renderBookCatalog() { const c = document.getElementById('bookCatalogList'); if (!c) return; c.innerHTML = appState.books.map((b, i) => `<li class="${b.quantity===0?'out-of-stock':b.quantity<5?'low-stock':''}" style="padding:10px;border-bottom:1px solid var(--border-color);display:flex;justify-content:space-between;"><span>📖 <strong>${b.title}</strong> - ${b.type} - Qty: ${b.quantity} <span class="edit-icon" onclick="editBookInline(${i})">✏️</span></span><button onclick="deleteBook(${i})" class="btn-danger" style="padding:5px 10px;">🗑️</button></li>`).join(''); }
+
+        window.editBookInline = (i) => { const b = appState.books[i]; const t = prompt("Title:", b.title); if (t) b.title = t.trim(); const ty = prompt("Type:", b.type); if (ty) b.type = ty.trim(); const q = prompt("Qty:", b.quantity); if (q !== null && !isNaN(parseInt(q))) b.quantity = parseInt(q); saveState(); renderBookCatalog(); populateBookIssueSelect(); populateIndLendBookSelect(); updateDashboard(); showNotification("Updated!", "success"); };
+        window.deleteBook = (i) => { appState.books.splice(i, 1); saveState(); renderBookCatalog(); populateBookIssueSelect(); populateIndLendBookSelect(); updateDashboard(); };
+
+        function renderTeachers() { const tbody = document.getElementById('teacherTableBody'); if (!tbody) return; tbody.innerHTML = appState.teachers.map((t, i) => `<tr><td>${t.name} <span class="edit-icon" onclick="editTeacherInline(${i})">✏️</span></td><td>${t.subject||'-'}</td><td>${t.classes||'-'}</td><td>${t.duty||'-'}</td><td>${isAdmin()?`<button onclick="deleteTeacher(${i})" class="btn-danger">🗑️</button>`:'<span style="color:var(--text-muted);">Admin only</span>'}</td></tr>`).join(''); toggleTeacherAdminControls(); }
+
+        window.editTeacherInline = (i) => { const t = appState.teachers[i]; const n = prompt("Name:", t.name); if (n) t.name = n.trim(); const s = prompt("Subjects:", t.subject || ''); if (s !== null) t.subject = s.trim(); const c = prompt("Classes:", t.classes || ''); if (c !== null) t.classes = c.trim(); const d = prompt("Class Assigned:", t.duty || ''); if (d !== null) t.duty = d.trim(); saveState(); renderTeachers(); showNotification("Updated!", "success"); };
+        window.deleteTeacher = (i) => { if (!isAdmin()) return; if (confirm(`Remove ${appState.teachers[i]?.name}?`)) { appState.teachers.splice(i, 1); saveState(); renderTeachers(); updateDashboard(); } };
+
+        function renderSavedClassLists() { const c = document.getElementById('savedClassListsContainer'); const bs = document.getElementById('bookIssueClassSelect'); const fs = document.getElementById('furnitureClassSelect'); if (c) c.innerHTML = Object.keys(appState.savedClassLists).map(n => `<button class="btn-secondary" onclick="loadClassPreview('${n}')">📋 ${n} (${appState.savedClassLists[n].length})</button> `).join(''); if (bs) bs.innerHTML = '<option value="">-- Select --</option>' + Object.keys(appState.savedClassLists).map(n => `<option>${n}</option>`).join(''); if (fs) fs.innerHTML = '<option value="">-- Select --</option>' + Object.keys(appState.savedClassLists).map(n => `<option>${n}</option>`).join(''); }
+        window.loadClassPreview = (n) => { appState.currentClassList = JSON.parse(JSON.stringify(appState.savedClassLists[n])); };
+
+        function generateWallpaperGallery() { const grid = document.getElementById('wallpaperGrid'); if (!grid) return; const wps = [
+            { name: 'Library', url: 'https://images.unsplash.com/photo-1521587760476-6c12a4b040da?w=600&h=375&fit=crop' },
+            { name: 'Classroom', url: 'https://images.unsplash.com/photo-1497633762265-9d179a990aa6?w=600&h=375&fit=crop' },
+            { name: 'School', url: 'https://images.unsplash.com/photo-1577896851231-70ef18881754?w=600&h=375&fit=crop' },
+            { name: 'Study', url: 'https://images.unsplash.com/photo-1434030216411-0b793f4b4173?w=600&h=375&fit=crop' },
+            { name: 'Sunset', url: 'https://images.unsplash.com/photo-1495616811223-4d98c6e9c869?w=600&h=375&fit=crop' },
+            { name: 'Ocean', url: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=600&h=375&fit=crop' },
+            { name: 'Forest', url: 'https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=600&h=375&fit=crop' },
+            { name: 'Mountain', url: 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=600&h=375&fit=crop' },
+            { name: 'Night', url: 'https://images.unsplash.com/photo-1419242902214-272b3f66ee7a?w=600&h=375&fit=crop' },
+            { name: 'Calm', url: 'https://images.unsplash.com/photo-1557683316-973673baf926?w=600&h=375&fit=crop' },
+        ];
+        grid.innerHTML = ''; const current = localStorage.getItem('wallpaper');
+        wps.forEach(wp => { const div = document.createElement('div'); div.className = 'wallpaper-option'; div.innerHTML = `<img src="${wp.url}" alt="${wp.name}" loading="lazy"><div class="wallpaper-label">${wp.name}</div>`; div.onclick = () => { document.body.style.backgroundImage = `url('${wp.url}')`; document.body.style.backgroundSize = 'cover'; document.body.style.backgroundPosition = 'center'; localStorage.setItem('wallpaper', `url('${wp.url}')`); document.querySelectorAll('.wallpaper-option').forEach(w => w.classList.remove('selected')); div.classList.add('selected'); showNotification(`Wallpaper: ${wp.name}`, "success"); }; if (current === `url('${wp.url}')`) div.classList.add('selected'); grid.appendChild(div); }); }
+
+        function loadWallpaper() { const saved = localStorage.getItem('wallpaper'); if (saved) { document.body.style.backgroundImage = saved; document.body.style.backgroundSize = 'cover'; document.body.style.backgroundPosition = 'center'; } }
+
+        function renderStaffList() { const c = document.getElementById('staffList'); if (c) c.innerHTML = appState.users.map((u, i) => `<li style="padding:10px;border-bottom:1px solid var(--border-color);display:flex;justify-content:space-between;"><span><strong>${u.name}</strong> <span class="role-badge role-${u.role}">${u.role}</span> - ${u.email}${u.phone?` | 📞 ${u.phone}`:''}${u.staffId?` | ID: ${u.staffId}`:''}</span>${isAdmin()?`<button onclick="deleteStaff(${i})" class="btn-danger" style="padding:5px 10px;">🗑️</button>`:''}</li>`).join(''); }
+
+        window.deleteStaff = (i) => { if (!isAdmin()) return; if (confirm("Remove staff?")) { appState.users.splice(i, 1); saveState(); renderStaffList(); } };
+
+        function logout() { if (appState.currentUser) addAuditEntry('Logout', appState.currentUser.name); appState.currentUser = null; appState.currentRole = null; saveState(); stopChatRefresh(); location.reload(); }
+        window.logout = logout;
+
+        function renderAll() { updateDashboard(); renderBorrowedTable(); renderDueReminders(); renderMembers(); renderBookCatalog(); renderTeachers(); renderFurnitureAssignments(); renderIndividualLendings(); populateBookIssueSelect(); populateIndLendBookSelect(); renderBookIssueTable(); renderFurnitureAllocTable(); renderSavedClassLists(); renderStaffList(); renderAuditLog(); renderChatUsers(); renderSystemOverview(); updateUnreadBadge(); }
+
+        // Event Listeners
+        document.getElementById('loadBookIssueClassBtn')?.addEventListener('click', loadClassForBookIssue);
+        document.getElementById('bulkAssignBookNumbersBtn')?.addEventListener('click', () => { const start = parseInt(prompt("Start number:")); if (isNaN(start)) return; document.querySelectorAll('#bookIssueTableBody input[type="checkbox"]:checked:not([disabled])').forEach((cb, i) => { const inp = document.getElementById(`bookNo-${cb.dataset.idx}`); if (inp && !inp.readOnly) inp.value = start + i; }); });
+        document.getElementById('assignBooksBtn')?.addEventListener('click', () => { const bookTitle = document.getElementById('bookIssueSelect').value; const bDate = document.getElementById('bookIssueDate').value; const rDate = document.getElementById('bookReturnDate').value; if (!bookTitle || !bDate || !rDate) { showNotification("Fill all fields", "error"); return; } const book = appState.books.find(b => b.title === bookTitle); if (!book || book.quantity <= 0) { showNotification("Out of stock", "error"); return; } const sel = []; document.querySelectorAll('#bookIssueTableBody input[type="checkbox"]:checked:not([disabled])').forEach(cb => { const i = parseInt(cb.dataset.idx); const no = document.getElementById(`bookNo-${i}`).value; if (no) sel.push({ ...currentBookIssueClass[i], bookNo: no }); }); if (!sel.length) { showNotification("Select students", "error"); return; } if (sel.length > book.quantity) { showNotification(`Only ${book.quantity} available!`, "error"); return; } sel.forEach(s => { const id = Date.now() + Math.random(); appState.bookIssues.push({ id, ...s, bookTitle, type: book.type, borrowDate: bDate, returnDate: rDate, returned: false }); book.quantity--; appState.borrowed.push({ id, name: s.name, adm: s.adm, bookTitle, bookNo: s.bookNo, borrowDate: bDate, returnDate: rDate, returned: false, type: book.type }); }); saveState(); addAuditEntry('Books Issued', `${sel.length} ${bookTitle}`); renderBookIssueTable(); renderBorrowedTable(); populateBookIssueSelect(); populateIndLendBookSelect(); updateDashboard(); showNotification(`Issued ${sel.length} books!`, "success"); });
+        document.getElementById('selectAllBookIssue')?.addEventListener('change', function() { document.querySelectorAll('#bookIssueTableBody input[type="checkbox"]:not([disabled])').forEach(cb => cb.checked = this.checked); });
+
+        document.getElementById('individualLendBtn')?.addEventListener('click', () => { const name = document.getElementById('indLendName').value.trim(); const adm = document.getElementById('indLendAdm').value.trim(); const bookTitle = document.getElementById('indLendBook').value; const bookNo = document.getElementById('indLendBookNo').value.trim(); const bDate = document.getElementById('indLendBorrowDate').value; const rDate = document.getElementById('indLendReturnDate').value; if (!name || !adm || !bookTitle || !bDate || !rDate) { showNotification("Fill all fields", "error"); return; } const book = appState.books.find(b => b.title === bookTitle); if (!book || book.quantity <= 0) { showNotification("Out of stock", "error"); return; } book.quantity--; const id = Date.now() + Math.random(); const rec = { id, name, adm, form: document.getElementById('indLendForm').value, stream: document.getElementById('indLendStream').value, bookTitle, bookNo, borrowDate: bDate, returnDate: rDate, returned: false, type: book.type }; appState.individualLendings.push(rec); appState.borrowed.push(rec); saveState(); addAuditEntry('Lend', `${name} borrowed ${bookTitle}`); ['indLendName','indLendAdm','indLendForm','indLendStream','indLendBookNo'].forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; }); renderIndividualLendings(); renderBorrowedTable(); populateIndLendBookSelect(); populateBookIssueSelect(); updateDashboard(); showNotification("Book lent!", "success"); });
+
+        document.getElementById('loadFurnitureClassBtn')?.addEventListener('click', loadClassForFurniture);
+        document.getElementById('assignFurnitureBtn')?.addEventListener('click', () => { const date = document.getElementById('furnitureAllocDate').value; if (!date) { showNotification("Select date", "error"); return; } const sel = []; document.querySelectorAll('#furnitureAllocTableBody input[type="checkbox"]:checked:not([disabled])').forEach(cb => { const i = parseInt(cb.dataset.idx); const chair = document.getElementById(`chairNo-${i}`).value; const locker = document.getElementById(`lockerNo-${i}`).value; if (chair || locker) sel.push({ ...currentFurnitureClass[i], chair, locker, date }); }); if (!sel.length) { showNotification("Select students", "error"); return; } sel.forEach(s => appState.furnitureAllocations.push({ id: Date.now() + Math.random(), ...s, returned: false })); saveState(); addAuditEntry('Furniture', `Allocated to ${sel.length} students`); renderFurnitureAllocTable(); renderFurnitureAssignments(); updateDashboard(); showNotification(`Allocated to ${sel.length}!`, "success"); });
+        document.getElementById('selectAllFurniture')?.addEventListener('change', function() { document.querySelectorAll('#furnitureAllocTableBody input[type="checkbox"]:not([disabled])').forEach(cb => cb.checked = this.checked); });
+
+        document.getElementById('searchReturnBtn')?.addEventListener('click', () => { const q = document.getElementById('returnSearchInput').value.toLowerCase(); const books = appState.borrowed.filter(b => !b.returned && (b.name.toLowerCase().includes(q) || b.adm.includes(q) || b.bookNo?.includes(q))); const furniture = appState.furnitureAllocations.filter(f => !f.returned && (f.name.toLowerCase().includes(q) || f.adm.includes(q) || f.chair?.includes(q) || f.locker?.includes(q))); document.getElementById('returnResults').innerHTML = `<h3>📚 Books</h3><table><tr><th>Student</th><th>ADM</th><th>Book</th><th>No</th><th>Due</th><th>Action</th></tr>${books.map(b=>`<tr><td>${b.name}</td><td>${b.adm}</td><td>${b.bookTitle}</td><td>${b.bookNo}</td><td>${b.returnDate}</td><td><button onclick="returnBookById('${b.id}')" class="btn-success">Return</button></td></tr>`).join('')}</table><h3>🪑 Furniture</h3><table><tr><th>Student</th><th>ADM</th><th>Chair</th><th>Locker</th><th>Action</th></tr>${furniture.map(f=>`<tr><td>${f.name}</td><td>${f.adm}</td><td>${f.chair||'-'}</td><td>${f.locker||'-'}</td><td><button onclick="returnFurnitureById('${f.id}')" class="btn-success">Return</button></td></tr>`).join('')}</table>`; });
+
+        document.getElementById('addMemberBtn')?.addEventListener('click', () => { if (!isAdmin()) return; const n = document.getElementById('newMemberName').value.trim(); const id = document.getElementById('newMemberId').value.trim(); if (n) { appState.members.push({ name: n, id: id || `MEM-${Date.now()}` }); saveState(); renderMembers(); updateDashboard(); document.getElementById('newMemberName').value = ''; document.getElementById('newMemberId').value = ''; showNotification("Added!", "success"); } });
+
+        document.getElementById('addBookBtn')?.addEventListener('click', () => { const t = document.getElementById('newBookTitle').value.trim(); const ty = document.getElementById('newBookType').value; const q = parseInt(document.getElementById('newBookQty').value); if (t && q > 0) { const ex = appState.books.find(b => b.title === t); if (ex) { ex.quantity += q; ex.type = ty; } else appState.books.push({ title: t, type: ty, quantity: q }); saveState(); renderBookCatalog(); populateBookIssueSelect(); populateIndLendBookSelect(); updateDashboard(); document.getElementById('newBookTitle').value = ''; document.getElementById('newBookQty').value = '1'; showNotification("Updated!", "success"); } });
+
+        document.getElementById('addTeacherBtn')?.addEventListener('click', () => { if (!isAdmin()) return; const n = document.getElementById('teacherName').value.trim(); if (n) { appState.teachers.push({ name: n, subject: document.getElementById('teacherSubject').value, classes: document.getElementById('teacherClasses').value, duty: document.getElementById('teacherDuty').value }); saveState(); renderTeachers(); updateDashboard(); ['teacherName','teacherSubject','teacherClasses','teacherDuty'].forEach(id => document.getElementById(id).value = ''); showNotification("Added!", "success"); } });
+
+        document.getElementById('importClassExcelBtn')?.addEventListener('click', () => { const f = document.getElementById('classExcelInput').files[0]; if (!f) return; const r = new FileReader(); r.onload = (e) => { const wb = XLSX.read(new Uint8Array(e.target.result), { type: 'array' }); const json = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]]); appState.currentClassList = json.map(row => ({ name: Object.values(row)[0] || 'Unknown', adm: String(Object.values(row)[1] || 'N/A') })); showNotification(`Imported ${appState.currentClassList.length}`, "success"); }; r.readAsArrayBuffer(f); });
+        document.getElementById('saveClassListBtn')?.addEventListener('click', () => { const n = document.getElementById('saveClassName').value.trim(); if (n && appState.currentClassList.length) { appState.savedClassLists[n] = JSON.parse(JSON.stringify(appState.currentClassList)); saveState(); renderSavedClassLists(); document.getElementById('saveClassName').value = ''; showNotification("Saved!", "success"); } });
+
+        document.getElementById('generateQRCodesBtn')?.addEventListener('click', () => { const type = document.getElementById('qrTypeSelect').value; const start = parseInt(document.getElementById('qrStartNum').value); const end = parseInt(document.getElementById('qrEndNum').value); const c = document.getElementById('qrLabelsContainer'); if (!c || end - start > 100) return; c.innerHTML = ''; for (let i = start; i <= end; i++) { const d = document.createElement('div'); d.innerHTML = `<strong>${type}: ${i}</strong><div id="qr-${type}-${i}"></div>`; c.appendChild(d); new QRCode(document.getElementById(`qr-${type}-${i}`), { text: `${type}-${i}`, width: 100, height: 100 }); } });
+        document.getElementById('startScannerBtn')?.addEventListener('click', function() { if (qrScanner) { qrScanner.stop().catch(() => {}); qrScanner = null; document.getElementById('qrScannerContainer').innerHTML = ''; this.textContent = '📷 Start Scanner'; return; } document.getElementById('qrScannerContainer').innerHTML = '<div id="qr-reader" style="width:100%"></div>'; qrScanner = new Html5Qrcode("qr-reader"); qrScanner.start({ facingMode: "environment" }, { fps: 10, qrbox: { width: 250, height: 250 } }, (decoded) => { document.getElementById('scannedResult').textContent = `✅ ${decoded}`; qrScanner.stop().catch(() => {}); qrScanner = null; this.textContent = '📷 Start Scanner'; document.getElementById('qrScannerContainer').innerHTML = ''; }, (err) => console.warn(err)).catch(err => showNotification("Camera error: " + err, "error")); this.textContent = '🛑 Stop'; });
+
+        document.getElementById('applyCustomWallpaperBtn')?.addEventListener('click', () => { const file = document.getElementById('customWallpaperInput').files[0]; if (file) { const r = new FileReader(); r.onload = (e) => { document.body.style.backgroundImage = `url('${e.target.result}')`; document.body.style.backgroundSize = 'cover'; document.body.style.backgroundPosition = 'center'; localStorage.setItem('wallpaper', `url('${e.target.result}')`); showNotification("Applied!", "success"); }; r.readAsDataURL(file); } });
+        document.getElementById('resetWallpaperBtn')?.addEventListener('click', () => { document.body.style.backgroundImage = ''; localStorage.removeItem('wallpaper'); document.querySelectorAll('.wallpaper-option').forEach(w => w.classList.remove('selected')); showNotification("Reset", "success"); });
+
+        document.getElementById('createStaffBtn')?.addEventListener('click', () => { if (!isAdmin()) return; const e = document.getElementById('newStaffEmail').value.trim(); const n = document.getElementById('newStaffName').value.trim(); const r = document.getElementById('newStaffRole').value; let p = document.getElementById('newStaffPassword').value.trim() || Math.random().toString(36).substring(2, 10); if (e && n) { appState.users.push({ code: appState.inviteCode, name: n, email: e, role: r, password: p, staffId: `${r.toUpperCase()}-${Date.now().toString(36).toUpperCase()}` }); saveState(); renderStaffList(); showNotification(`Created ${r}! PW: ${p}`, "success"); ['newStaffEmail','newStaffName','newStaffPassword'].forEach(id => document.getElementById(id).value = ''); } });
+        document.getElementById('saveEmailSettingsBtn')?.addEventListener('click', () => { appState.emailSettings = { publicKey: document.getElementById('emailPublicKey').value, serviceID: document.getElementById('emailServiceID').value, templateID: document.getElementById('emailTemplateID').value, recipient: document.getElementById('emailRecipient').value }; saveState(); if (window.emailjs) emailjs.init(appState.emailSettings.publicKey); showNotification("Saved!", "success"); });
+        document.getElementById('exportDataBtn')?.addEventListener('click', () => { const b = new Blob([JSON.stringify(appState, null, 2)], { type: 'application/json' }); const a = document.createElement('a'); a.href = URL.createObjectURL(b); a.download = `srms_backup_${new Date().toISOString().split('T')[0]}.json`; a.click(); });
+        document.getElementById('importDataBtn')?.addEventListener('click', () => document.getElementById('importFileInput').click());
+        document.getElementById('importFileInput')?.addEventListener('change', (e) => { const f = e.target.files[0]; if (f) { const r = new FileReader(); r.onload = (ev) => { try { if (confirm('Restore?')) { Object.assign(appState, JSON.parse(ev.target.result)); saveState(); location.reload(); } } catch { showNotification("Invalid file", "error"); } }; r.readAsText(f); } });
+        document.getElementById('clearAllDataBtn')?.addEventListener('click', () => { if (confirm("DELETE ALL?") && prompt("Type DELETE:") === 'DELETE') { localStorage.clear(); location.reload(); } });
+
+        document.getElementById('generateReportBtn')?.addEventListener('click', () => { const type = document.getElementById('reportType').value; let data = [], title = ''; if (type === 'books') { title = 'Books'; data = appState.borrowed; } else if (type === 'furniture') { title = 'Furniture'; data = appState.furnitureAllocations; } else if (type === 'overdue') { title = 'Overdue'; data = appState.borrowed.filter(b => !b.returned && new Date(b.returnDate) < new Date()); } else { document.getElementById('reportOutput').innerHTML = `<p>📚 Active: ${appState.borrowed.filter(b=>!b.returned).length} | 🔴 Overdue: ${appState.borrowed.filter(b=>!b.returned&&new Date(b.returnDate)<new Date()).length} | 🪑 Furniture: ${appState.furnitureAllocations.filter(f=>!f.returned).length} | 👨‍🏫 Teachers: ${appState.teachers.length}</p>`; return; } if (data.length) { const ws = XLSX.utils.json_to_sheet(data); const wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, ws, title); XLSX.writeFile(wb, `${title}_${new Date().toISOString().split('T')[0]}.xlsx`); document.getElementById('reportOutput').innerHTML = `<p>✅ ${data.length} records exported!</p>`; } });
+        document.getElementById('exportBorrowedExcel')?.addEventListener('click', () => { const ws = XLSX.utils.json_to_sheet(appState.borrowed); const wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, ws, "Borrowed"); XLSX.writeFile(wb, `Borrowed_${new Date().toISOString().split('T')[0]}.xlsx`); });
+        document.getElementById('exportFurnitureExcel')?.addEventListener('click', () => { const ws = XLSX.utils.json_to_sheet(appState.furnitureAllocations); const wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, ws, "Furniture"); XLSX.writeFile(wb, `Furniture_${new Date().toISOString().split('T')[0]}.xlsx`); });
+        document.getElementById('exportAuditLogBtn')?.addEventListener('click', () => { const ws = XLSX.utils.json_to_sheet(appState.auditLog); const wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, ws, "Audit"); XLSX.writeFile(wb, `Audit_${new Date().toISOString().split('T')[0]}.xlsx`); });
+
+        const today = new Date().toISOString().split('T')[0];
+        const returnDate = new Date();
+        returnDate.setDate(returnDate.getDate() + 14);
+        const returnDateStr = returnDate.toISOString().split('T')[0];
+        ['bookIssueDate', 'furnitureAllocDate', 'indLendBorrowDate'].forEach(id => { const el = document.getElementById(id); if (el) el.value = today; });
+        ['bookReturnDate', 'indLendReturnDate'].forEach(id => { const el = document.getElementById(id); if (el) el.value = returnDateStr; });
+
+        async function loadApp() {
+            initSupabase();
+            const saved = localStorage.getItem('schoolSystemV6');
+            if (saved) { try { Object.assign(appState, JSON.parse(saved)); } catch (e) {} }
+            if (!appState.books.length) appState.books = [{ title: "Mathematics Form 1", type: "Textbook", quantity: 50 }, { title: "English Novel", type: "Novel", quantity: 30 }];
+            if (!appState.members.length) appState.members = [{ name: "John Doe", id: "MEM-001" }, { name: "Jane Smith", id: "MEM-002" }];
+            if (!appState.savedClassLists) appState.savedClassLists = {};
+            if (!appState.individualLendings) appState.individualLendings = [];
+            if (!appState.auditLog) appState.auditLog = [];
+            if (!appState.chatMessages) appState.chatMessages = [];
+            saveState();
+            createStartupParticles();
+            generateWallpaperGallery();
+            if (appState.currentUser) {
+                document.getElementById('startupPage').classList.add('hidden');
+                document.getElementById('mainApp').classList.remove('hidden');
+                document.getElementById('schoolHeader').textContent = appState.orgName;
+                document.getElementById('userInfo').innerHTML = `👤 ${appState.currentUser.name} <span class="role-badge role-${appState.currentRole}">${appState.currentRole.toUpperCase()}</span>${appState.currentUser.staffId ? ` | ID: ${appState.currentUser.staffId}` : ''}`;
+                document.getElementById('dashboardInviteCode').textContent = appState.inviteCode || '------';
+                loadWallpaper();
+                renderAll();
+            } else {
+                document.getElementById('startupPage').classList.remove('hidden');
+                document.getElementById('mainApp').classList.add('hidden');
+            }
+        }
+        loadApp();
+        console.log('🏫 SRMS v6.0 by WeGEM | Supabase Backend | Chat | Admin+ | System Overview');
+    </script>
+</body>
+</html>
